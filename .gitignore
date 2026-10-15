@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.venv/
+
+# local config and data: copy config.example/ to config/ and fill it in
+config/
+.secrets/
+.messaging_history/
+.ai_memory/
+artifacts/
+logs/
+*.log
+*.pid
+*.sqlite3
+*.pkl
+.env
+.env.*
+
+# third-party binaries, see README
+_service/nssm.exe
+_tools/LibreHardwareMonitor/
+_tools/PawnIO_setup.exe
+node_modules/
+
+# page build pipeline output
+app/static/*.html.*
+app/static/_selftest_shots_*/
+_tools/page_tests/test-results/
+_tools/page_tests/report.json
+_tools/page_tests/runs/
+
+triage_report.md

@@ -1,0 +1,139 @@
+{
+  "default_provider": "debug",
+  "providers": {
+    "debug": {
+      "enabled": true
+    },
+    "bluebubbles_http": {
+      "enabled": true,
+      "server_url": "http://127.0.0.1:1234",
+      "send_path": "/api/v1/message/text",
+      "status_path": "/api/v1/ping",
+      "auth_mode": "query",
+      "password_env": "BLUEBUBBLES_PASSWORD",
+      "password_query_name": "password",
+      "default_target": "",
+      "target_field": "chatGuid",
+      "text_field": "message",
+      "include_temp_guid": true,
+      "extra_payload": {
+        "method": "private-api"
+      },
+      "timeout_seconds": 30
+    },
+    "http_bridge": {
+      "enabled": false,
+      "send_url": "",
+      "method": "POST",
+      "auth_header_env": "MESSAGING_BRIDGE_TOKEN",
+      "target_field": "target",
+      "text_field": "text",
+      "timeout_seconds": 10
+    },
+    "openclaw_imessage": {
+      "enabled": false,
+      "mode": "planned",
+      "notes": ""
+    }
+  },
+  "auto_reply": {
+    "enabled": true,
+    "provider": "bluebubbles_http",
+    "model": "qwen3.8:latest",
+    "num_ctx": 32768,
+    "vision_model": "qwen3.8:latest",
+    "deep_model": "qwen3.8:latest",
+    "deep_repair": false,
+    "ollama_url": "http://127.0.0.1:11434",
+    "agentic_routing": "active",
+    "routing_watcher_model": "embed:latest",
+    "routing_watcher_timeout_seconds": 5,
+    "routing_watcher_min_confidence": 0.8,
+    "system_prompt": "You are answering iMessages on the owner's behalf. Reply naturally and briefly, in the same language as the incoming message. Never mention that you are an AI unless directly asked.",
+    "allowed_senders": [
+      "owner@example.com",
+      "+37120000001",
+      "+37120000002"
+    ],
+    "history_limit": 100,
+    "max_replies_per_hour": 60,
+    "timeout_seconds": 120,
+    "contact_names": {
+      "+37120000001": "Anna",
+      "+37120000002": "Pēteris"
+    },
+    "chat_two_layer": true,
+    "chat_think_model": "qwen3.8:latest",
+    "assistant_chats": [
+      "iMessage;-;owner@example.com"
+    ],
+    "persona_test_chats": [],
+    "chat_model_lv": "",
+    "lv_model": "",
+    "reply_pipeline": "",
+    "images_per_hour": 6,
+    "voice_replies": true,
+    "pipeline_model": "qwen3.8:latest",
+    "pipeline_translate_in": false,
+    "translator": "",
+    "read_links": true,
+    "translate_model": "qwen3.8:latest",
+    "assistant_enabled": true,
+    "answer_then_style": false,
+    "vision_two_step": false,
+    "reply_persona": "ai",
+    "hermes_context": true,
+    "assistant_model": "qwen3.8:latest",
+    "assistant_agent_tools": "active",
+    "assistant_agent_downloads": false,
+    "style_model": "",
+    "partner_handles": [
+      "+37120000001"
+    ],
+    "organizer_email": "owner@example.com",
+    "owner_name": "Jānis",
+    "calendar_share_token": "",
+    "calendar_enabled": true,
+    "routing_watcher_kind": "llm",
+    "safe_reply_model": "qwen3.8:latest",
+    "contact_notes": {
+      "Anna": "Jāņa draudzene."
+    },
+    "reply_guards": false,
+    "agent_thinking": true
+  },
+  "daily_digest": {
+    "enabled": true,
+    "hour": 9,
+    "target": "",
+    "targets": [
+      "iMessage;-;owner@example.com"
+    ],
+    "picks_lv": 5,
+    "picks_tech": 3,
+    "numbered": false
+  },
+  "people": {
+    "owner": {
+      "nom": "Jānis",
+      "gen": "Jāņa",
+      "dat": "Jānim",
+      "acc": "Jāni",
+      "full": "Jānis Bērziņš",
+      "full_gen": "Jāņa Bērziņa",
+      "about_lv": "Viņš interesējas par tehnoloģijām, AI, auto un sportu.",
+      "about_en": "He follows tech, AI, cars and sport."
+    },
+    "partner": {
+      "nom": "Anna",
+      "gen": "Annas",
+      "dat": "Annai",
+      "acc": "Annu"
+    },
+    "aliases": [
+      "Pēteri",
+      "Pēterim",
+      "Pētera"
+    ]
+  }
+}

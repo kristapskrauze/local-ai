@@ -1,0 +1,58 @@
+{
+  "version": "2026-08-20-phase2",
+  "purpose": "Structured Latvian grammar taxonomy for Owen's local outgoing grammar engine. Uzdevumi.lv is used as a public curriculum topic map, not as copied exercise content.",
+  "sources": [
+    {
+      "name": "Uzdevumi.lv Latvian language topic map",
+      "url": "https://www.uzdevumi.lv/p/latviesu-valoda",
+      "used_for": "School-level topic structure: noun, adjective, numeral, verb, pronoun, adverb, sentence grammar, syntax, preposition, conjunction, particle, punctuation."
+    },
+    {
+      "name": "Uzdevumi.lv Latvian language after Skola2030 sample programme",
+      "url": "https://www.uzdevumi.lv/p/latviesu-valoda-pec-skola2030-paraugprogrammas",
+      "used_for": "Practical grammar structure: gender agreement, colloquial/non-literary speech, slang/jargon, morphology, conjugation, participles, prepositions, conjunctions, particles, homonymy."
+    }
+  ],
+  "categories": {
+    "nouns.case": {
+      "concepts": ["Lietvārds", "Locīšana", "Teikuma locekļi"],
+      "priority": "high",
+      "description": "Noun case in generated everyday sentence contexts."
+    },
+    "adjectives.agreement": {
+      "concepts": ["Īpašības vārds", "Vārdu saskaņojums", "dzimte", "skaitlis"],
+      "priority": "high",
+      "description": "Adjective agreement with plural personal pronouns in clear predicate constructions."
+    },
+    "verbs.subject_verb_agreement": {
+      "concepts": ["Darbības vārds", "Darbības vārda konjugācijas", "persona", "skaitlis"],
+      "priority": "high",
+      "description": "Finite verb agreement where the explicit subject and verb are close enough for high confidence."
+    },
+    "pronouns.case": {
+      "concepts": ["Vietniekvārds", "locījums", "teikuma locekļi"],
+      "priority": "high",
+      "description": "Personal pronoun case after clear transitive or dative-governing verbs."
+    },
+    "pronouns.reflexive_possessive": {
+      "concepts": ["Vietniekvārds", "savs", "reference ambiguity"],
+      "priority": "medium",
+      "description": "Reflexive possessive diagnostics are detection-only unless context is unambiguous."
+    },
+    "prepositions.case_government": {
+      "concepts": ["Prievārds", "locījums", "vārdu saistījums"],
+      "priority": "high",
+      "description": "Common preposition plus noun case in safe everyday contexts."
+    },
+    "verbs.case_government": {
+      "concepts": ["Darbības vārds", "vārdu saistījums", "locījums"],
+      "priority": "high",
+      "description": "Verb-governed complements such as zvanīt/piezvanīt/palīdzēt/jautāt/uzticēties."
+    },
+    "punctuation.syntax": {
+      "concepts": ["komati", "palīgteikums", "divdabja teiciens", "uzruna", "iespraudumi"],
+      "priority": "medium",
+      "description": "Tracked in coverage and tests, but not aggressively auto-corrected."
+    }
+  }
+}

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="lv">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Label</title>
+<link rel="stylesheet" href="/static/styles.css?v=65">
+<style>
+.lbl-wrap{max-width:720px;margin:0 auto;padding:14px 12px calc(30px + var(--safe-bottom))}
+.lbl-prog{font-size:12px;color:var(--txt3);margin-bottom:10px;display:flex;
+  justify-content:space-between;align-items:center;gap:10px}
+.lbl-bar{flex:1;height:5px;background:var(--inset);border-radius:3px;overflow:hidden}
+.lbl-bar span{display:block;height:100%;background:var(--accent);transition:width .2s}
+.lbl-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;
+  padding:14px;margin-bottom:12px}
+.lbl-ctx{font-size:11.5px;color:var(--txt3);margin-bottom:10px;line-height:1.5}
+.lbl-row{margin:10px 0}
+.lbl-who{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.4px;
+  color:var(--txt3);margin-bottom:3px}
+.lbl-msg{font-size:15px;line-height:1.45;padding:9px 12px;border-radius:12px;
+  white-space:pre-wrap;word-break:break-word}
+.lbl-them{background:var(--inset);border:1px solid var(--border)}
+.lbl-bot{background:var(--amber-dim);border:1px solid rgba(212,167,44,.35)}
+.lbl-you{background:var(--accent-dim);border:1px solid rgba(83,155,245,.3)}
+.lbl-btns{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:14px}
+.lbl-btn{padding:15px 8px;border-radius:10px;border:1px solid var(--border);
+  background:var(--panel-2);color:var(--txt);font-size:13.5px;font-weight:700;
+  cursor:pointer;line-height:1.3}
+.lbl-btn b{display:block;font-size:17px;margin-bottom:2px}
+.lbl-b{border-color:rgba(229,83,75,.45)}.lbl-b b{color:var(--red)}
+.lbl-c{border-color:rgba(79,180,105,.45)}.lbl-c b{color:var(--green)}
+.lbl-u{color:var(--txt3)}
+.lbl-btn:active{transform:scale(.97)}
+.lbl-nav{display:flex;gap:8px;margin-top:10px}
+.lbl-nav button{flex:1;padding:9px;border-radius:8px;border:1px solid var(--border);
+  background:transparent;color:var(--txt3);font-size:12.5px;font-weight:600}
+.lbl-done{text-align:center;padding:40px 16px}
+</style>
+</head>
+<body data-app="label">
+<div class="app">
+  <header class="hdr">
+    <div class="hdr-left"><h1 class="rig">Label</h1>
+      <span class="host" id="lbl-sub">bot reply — bad or fine?</span></div>
+    <div class="hdr-right">
+      <a class="btn-icon app-switch" href="/me">Personal</a>
+    </div>
+  </header>
+  <main class="content">
+    <div class="lbl-wrap">
+      <div class="lbl-prog">
+        <span id="lbl-count">…</span>
+        <span class="lbl-bar"><span id="lbl-fill" style="width:0%"></span></span>
+        <span id="lbl-pct">0%</span>
+      </div>
+      <div id="lbl-body"></div>
+    </div>
+  </main>
+</div>
+<script>
+(function(){
+  var cases=[],i=0;
+  function $(s){return document.querySelector(s);}
+  function esc(t){return String(t==null?"":t).replace(/[&<>"]/g,function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+
+  function render(){
+    var done=cases.filter(function(c){return c.label;}).length;
+    $("#lbl-count").textContent=done+" / "+cases.length;
+    var pct=cases.length?Math.round(100*done/cases.length):0;
+    $("#lbl-fill").style.width=pct+"%"; $("#lbl-pct").textContent=pct+"%";
+    if(i>=cases.length){
+      $("#lbl-body").innerHTML='<div class="lbl-card lbl-done"><div class="ce-big">'+
+        'Done — '+done+' labelled</div><div class="ce-sub">Saved. Re-run the judge '+
+        'calibration to use them.</div></div>';
+      return;
+    }
+    var c=cases[i];
+    var ctx=(c.context||[]).slice(-2).map(function(x){return esc(x).slice(0,90);}).join(" · ");
+    $("#lbl-body").innerHTML=
+      '<div class="lbl-card">'+
+        (ctx?'<div class="lbl-ctx">'+ctx+'</div>':'')+
+        '<div class="lbl-row"><div class="lbl-who">Them</div>'+
+          '<div class="lbl-msg lbl-them">'+esc(c.incoming||"(nothing)")+'</div></div>'+
+        '<div class="lbl-row"><div class="lbl-who">Bot replied</div>'+
+          '<div class="lbl-msg lbl-bot">'+esc(c.bot)+'</div></div>'+
+        '<div class="lbl-row"><div class="lbl-who">You then sent</div>'+
+          '<div class="lbl-msg lbl-you">'+esc(c.he_sent)+'</div></div>'+
+        '<div class="lbl-btns">'+
+          '<button class="lbl-btn lbl-b" data-l="B"><b>B</b>bot was bad</button>'+
+          '<button class="lbl-btn lbl-c" data-l="C"><b>C</b>bot was fine</button>'+
+          '<button class="lbl-btn lbl-u" data-l="U"><b>U</b>unsure</button>'+
+        '</div>'+
+        '<div class="lbl-nav"><button data-nav="-1">← back</button>'+
+          '<button data-nav="1">skip →</button></div>'+
+      '</div>';
+  }
+
+  function save(label){
+    var c=cases[i]; c.label=label;
+    fetch("/api/label/set",{method:"POST",headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({n:c.n,label:label})}).catch(function(){});
+    i++; render();
+  }
+
+  document.addEventListener("click",function(e){
+    var b=e.target.closest("[data-l]");
+    if(b){save(b.getAttribute("data-l"));return;}
+    var n=e.target.closest("[data-nav]");
+    if(n){i=Math.max(0,Math.min(cases.length,i+parseInt(n.getAttribute("data-nav"),10)));render();}
+  });
+  document.addEventListener("keydown",function(e){
+    var k=e.key.toLowerCase();
+    if(k==="b"||k==="c"||k==="u")save(k.toUpperCase());
+    else if(k==="arrowleft"){i=Math.max(0,i-1);render();}
+    else if(k==="arrowright"){i=Math.min(cases.length,i+1);render();}
+  });
+
+  fetch("/api/label/cases",{cache:"no-store"}).then(function(r){return r.json();})
+    .then(function(j){
+      cases=j.cases||[];
+      for(var k=0;k<cases.length;k++){ if(!cases[k].label){i=k;break;} }
+      render();
+    }).catch(function(){
+      $("#lbl-body").innerHTML='<div class="lbl-card">Could not load cases.</div>';
+    });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+{
+  "local_root": "C:\\AI",
+  "policy": {
+    "autonomy": "review_gate",
+    "cloud": "review_only_explicit",
+    "redact_cloud_prompts": true,
+    "memory_enabled_default": true
+  },
+  "models": {
+    "assistant": "chat:latest",
+    "coding": "qwen3.8:latest",
+    "fast_coding": "qwen3.8:latest",
+    "local_reviewer": "qwen3.8:latest",
+    "general_reviewer": "chat:latest"
+  },
+  "cloud_reviewers": {
+    "anthropic": {
+      "enabled": false,
+      "api_key_env": "ANTHROPIC_API_KEY",
+      "model": "",
+      "endpoint": "https://api.anthropic.com/v1/messages",
+      "timeout_seconds": 90
+    },
+    "openrouter": {
+      "enabled": false,
+      "api_key_env": "OPENROUTER_API_KEY",
+      "endpoint": "https://openrouter.ai/api/v1/chat/completions",
+      "models": [],
+      "timeout_seconds": 90
+    }
+  },
+  "routes": {
+    "assistant_chat": {
+      "provider": "ollama",
+      "model": "assistant"
+    },
+    "coding": {
+      "provider": "ollama",
+      "model": "coding"
+    },
+    "local_review": {
+      "provider": "ollama",
+      "model": "local_reviewer"
+    },
+    "cloud_review": {
+      "provider": "anthropic",
+      "fallback": "openrouter"
+    }
+  },
+  "comfyui": {
+    "preferred_root": "C:\\AI\\ComfyUI",
+    "legacy_root": "",
+    "note": ""
+  }
+}

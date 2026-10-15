@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<!-- mini-design-v2-20260712 -->
+<!-- Mini dashboard for the in-case iPhone 4S (iOS 9 Safari).
+     Keep this ES5 + old-WebKit CSS: no fetch, no arrows, no let/const,
+     no CSS grid, no flexbox. -->
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Dobby Temps">
+<title>Dobby Temps</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=59">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { width:100%; height:100%; overflow:hidden; }
+  body {
+    background:#030609;
+    color:#f2f7fb;
+    font-family:-apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-variant-numeric:tabular-nums;
+    -webkit-font-smoothing:antialiased;
+  }
+  .top {
+    position:absolute; left:6px; right:6px; top:5px; height:20px;
+    color:#a9b7c4; font-size:11px; font-weight:700; line-height:20px;
+    letter-spacing:0; overflow:hidden;
+  }
+  .brand { float:left; color:#e6edf3; }
+  .chips { float:right; text-align:right; white-space:nowrap; }
+  .chip {
+    display:inline-block; height:20px; line-height:19px; padding:0 7px;
+    margin-left:4px; border:1px solid #25313b; border-radius:8px;
+    background:#091018; color:#cbd8e4; vertical-align:top;
+  }
+  .dot {
+    display:inline-block; width:8px; height:8px; border-radius:4px;
+    background:#f85149; margin-right:5px; vertical-align:0;
+  }
+  .dot.on { background:#2fdf84; box-shadow:0 0 10px rgba(47,223,132,.65); }
+
+  .hero { position:absolute; left:6px; right:6px; top:30px; height:146px; overflow:hidden; }
+  .tempbox {
+    float:left; width:49.15%; height:146px; overflow:hidden;
+    border:1px solid #1f2b35; border-radius:8px;
+    background:#071019;
+    box-shadow:inset 0 0 0 1px rgba(255,255,255,.025);
+  }
+  .tempbox + .tempbox { float:right; }
+  .label {
+    height:22px; line-height:23px; padding:0 10px;
+    color:#91a3b5; font-size:12px; font-weight:800; letter-spacing:0;
+    overflow:hidden;
+  }
+  .label span { float:right; color:#5fd19a; font-weight:700; }
+  .tempval {
+    height:122px; line-height:114px; text-align:center;
+    font-size:100px; font-weight:200; letter-spacing:0;
+  }
+  .cpu .tempval { color:#35e1ff; text-shadow:0 0 26px rgba(53,225,255,.55); }
+  .gpu .tempval { color:#8dff6a; text-shadow:0 0 26px rgba(141,255,106,.5); }
+  .hot .tempval { color:#ffa53d; text-shadow:0 0 26px rgba(255,165,61,.55); }
+  .crit .tempval { color:#ff5252; text-shadow:0 0 28px rgba(255,82,82,.65); }
+
+  .fans { position:absolute; left:6px; right:6px; top:183px; height:54px; overflow:hidden; }
+  .fanbox {
+    float:left; width:49.15%; height:54px; overflow:hidden;
+    border:1px solid #263340; border-radius:8px; background:#08111a;
+  }
+  .fanbox + .fanbox { float:right; }
+  .fanlabel {
+    float:left; width:38%; height:54px; padding:7px 0 0 9px;
+    color:#91a3b5; font-size:11px; font-weight:800; line-height:14px;
+  }
+  .fanlabel b { display:block; color:#dce8f2; font-size:13px; font-weight:800; }
+  .fanread {
+    float:right; width:62%; height:54px; padding:5px 8px 0 0; text-align:right;
+  }
+  .fanval { color:#f2f7fb; font-size:30px; font-weight:300; line-height:30px; }
+  .fansub { color:#91a3b5; font-size:11px; font-weight:700; line-height:15px; white-space:nowrap; }
+
+  .usage { position:absolute; left:6px; right:6px; top:244px; bottom:20px; overflow:hidden; }
+  .bar {
+    float:left; width:49.15%; height:24px; margin-bottom:7px; overflow:hidden;
+  }
+  .bar:nth-child(2n) { float:right; }
+  .barlabel {
+    height:13px; line-height:12px; color:#a9b7c4;
+    font-size:10px; font-weight:800; overflow:hidden;
+  }
+  .barlabel span { float:right; color:#eef5fb; font-size:11px; }
+  .track {
+    height:10px; border-radius:5px; background:#0d1620; overflow:hidden;
+    border:1px solid #24333f;
+  }
+  .fill {
+    height:10px; border-radius:5px; width:0%; background:#4fa9ff;
+    -webkit-transition:width .45s; transition:width .45s;
+    box-shadow:0 0 10px rgba(79,169,255,.5);
+  }
+  .fill.ok { background:#2bff96; box-shadow:0 0 10px rgba(43,255,150,.55); }
+  .fill.warn { background:#ffb84d; box-shadow:0 0 10px rgba(255,184,77,.55); }
+  .fill.crit { background:#ff5252; box-shadow:0 0 12px rgba(255,82,82,.6); }
+
+  .foot {
+    position:absolute; left:6px; right:6px; bottom:4px; height:14px;
+    line-height:14px; color:#6d7d8a; font-size:10px; font-weight:700;
+    text-align:center; overflow:hidden; white-space:nowrap;
+  }
+  .foot.warn { color:#ffb357; }
+  .foot.crit { color:#ff6b6b; }
+  .svc { display:inline-block; margin:0 4px; color:#8fa0ae; }
+  .sdot {
+    display:inline-block; width:6px; height:6px; border-radius:3px;
+    background:#f85149; margin-right:3px; vertical-align:1px;
+  }
+  .sdot.on { background:#2fdf84; }
+
+  @media (orientation: portrait) {
+    .top { left:7px; right:7px; top:6px; }
+    .chip { padding:0 5px; margin-left:2px; }
+    .hero { left:7px; right:7px; top:32px; height:230px; }
+    .tempbox, .tempbox + .tempbox { float:none; width:100%; height:111px; margin-bottom:8px; }
+    .label { height:19px; line-height:19px; font-size:11px; }
+    .tempval { height:88px; line-height:82px; font-size:80px; }
+    .fans { left:7px; right:7px; top:270px; height:84px; }
+    .fanbox, .fanbox + .fanbox { float:none; width:100%; height:38px; margin-bottom:6px; }
+    .fanlabel { height:38px; padding-top:5px; font-size:10px; line-height:12px; }
+    .fanlabel b { font-size:12px; }
+    .fanread { height:38px; padding-top:2px; }
+    .fanval { font-size:24px; line-height:24px; }
+    .fansub { font-size:10px; line-height:11px; }
+    .usage { left:7px; right:7px; top:362px; bottom:20px; }
+    .bar, .bar:nth-child(2n) { float:none; width:100%; height:23px; margin-bottom:5px; }
+  }
+</style>
+</head>
+<body>
+  <div class="top">
+    <span class="brand"><span id="live-dot" class="dot"></span><span id="live-tx">DOBBY</span></span>
+    <span class="chips">
+      <span class="chip" id="mhz-chip">-- MHz</span>
+      <span class="chip" id="wall-chip">-- W</span>
+    </span>
+  </div>
+
+  <div class="hero">
+    <div class="tempbox cpu" id="cpu-temp-box">
+      <div class="label">CPU</div>
+      <div class="tempval" id="cpu-temp">--&deg;</div>
+    </div>
+    <div class="tempbox gpu" id="gpu-temp-box">
+      <div class="label">GPU</div>
+      <div class="tempval" id="gpu-temp">--&deg;</div>
+    </div>
+  </div>
+
+  <div class="fans">
+    <div class="fanbox">
+      <div class="fanlabel">CPU<b>FAN</b></div>
+      <div class="fanread"><div class="fanval" id="cpu-fan">--</div><div class="fansub" id="cpu-fan-sub">waiting</div></div>
+    </div>
+    <div class="fanbox">
+      <div class="fanlabel">GPU<b>FAN</b></div>
+      <div class="fanread"><div class="fanval" id="gpu-fan">--</div><div class="fansub" id="gpu-fan-sub">waiting</div></div>
+    </div>
+  </div>
+
+  <div class="usage">
+    <div class="bar"><div class="barlabel">CPU LOAD <span id="cpu-pct">--%</span></div><div class="track"><div class="fill" id="cpu-fill"></div></div></div>
+    <div class="bar"><div class="barlabel">GPU LOAD <span id="gpu-pct">--%</span></div><div class="track"><div class="fill" id="gpu-fill"></div></div></div>
+    <div class="bar"><div class="barlabel">RAM <span id="ram-pct">--%</span></div><div class="track"><div class="fill ok" id="ram-fill"></div></div></div>
+    <div class="bar"><div class="barlabel">VRAM <span id="vram-pct">--%</span></div><div class="track"><div class="fill ok" id="vram-fill"></div></div></div>
+  </div>
+
+  <div class="foot" id="foot">waiting for data...</div>
+
+<script>
+(function () {
+  "use strict";
+  var lastOk = 0;
+  var servicesHtml = "";
+  var warningText = "";
+
+  function $(id) { return document.getElementById(id); }
+
+  function get(url, cb) {
+    var x = new XMLHttpRequest();
+    x.open("GET", url, true);
+    x.timeout = 7000;
+    x.onreadystatechange = function () {
+      if (x.readyState !== 4) return;
+      if (x.status === 200) {
+        try { cb(null, JSON.parse(x.responseText)); } catch (e) { cb(e, null); }
+      } else {
+        cb(new Error("http " + x.status), null);
+      }
+    };
+    x.ontimeout = function () { cb(new Error("timeout"), null); };
+    x.send();
+  }
+
+  function num(v) { return (typeof v === "number" && isFinite(v)) ? v : null; }
+
+  function clsFor(v, warn, crit, base) {
+    if (v === null) return base || "";
+    return (base || "") + (v >= crit ? " crit" : (v >= warn ? " hot" : ""));
+  }
+
+  function fillClass(pct) {
+    if (pct === null) return "fill";
+    if (pct >= 92) return "fill crit";
+    if (pct >= 75) return "fill warn";
+    return "fill ok";
+  }
+
+  function fmtTemp(v) {
+    return v === null ? "--&deg;" : Math.round(v) + "&deg;";
+  }
+
+  function fmtPct(v) {
+    return v === null ? "--%" : Math.round(v) + "%";
+  }
+
+  function fmtClock(v) {
+    if (v === null) return "-- MHz";
+    if (v >= 1000) return (v / 1000).toFixed(1) + " GHz";
+    return Math.round(v) + " MHz";
+  }
+
+  function fmtWatts(v) {
+    return v === null ? "-- W" : Math.round(v) + " W";
+  }
+
+  function fmtRpm(v) {
+    if (v === null) return "--";
+    return String(Math.round(v));
+  }
+
+  function clampPct(pct) {
+    if (pct === null) return null;
+    if (pct < 0) return 0;
+    if (pct > 100) return 100;
+    return pct;
+  }
+
+  function setBar(fillId, pctId, pct) {
+    var f = $(fillId), p = $(pctId);
+    pct = clampPct(pct);
+    if (pct === null) {
+      f.style.width = "0%";
+      f.className = "fill";
+      p.innerHTML = "--%";
+      return;
+    }
+    f.style.width = pct + "%";
+    f.className = fillClass(pct);
+    p.innerHTML = Math.round(pct) + "%";
+  }
+
+  function setTemp(boxId, txId, t, baseClass) {
+    $(txId).innerHTML = fmtTemp(t);
+    $(boxId).className = clsFor(t, 70, 85, "tempbox " + baseClass);
+  }
+
+  function cpuFanChannels(fan) {
+    var ch = fan && fan.channels ? fan.channels : [];
+    var out = [];
+    for (var i = 0; i < ch.length; i++) {
+      var idx = typeof ch[i].index === "number" ? ch[i].index : i;
+      if (idx === 0 || idx === 5) continue;
+      var rpm = num(ch[i].rpm);
+      if (rpm !== null && rpm > 0) out.push(ch[i]);
+    }
+    return out;
+  }
+
+  function fanMode(ch) {
+    return ch && ch.mode ? String(ch.mode) : "auto";
+  }
+
+  function setCpuFan(fan) {
+    var active = cpuFanChannels(fan);
+    var best = null;
+    for (var i = 0; i < active.length; i++) {
+      if (active[i].index === 1) {
+        best = active[i];
+        break;
+      }
+      if (!best || num(active[i].rpm) > num(best.rpm)) {
+        best = active[i];
+      }
+    }
+    if (!best) {
+      $("cpu-fan").innerHTML = "--";
+      $("cpu-fan-sub").innerHTML = fan && fan.error ? "fan readout off" : "no rpm";
+      return;
+    }
+    $("cpu-fan").innerHTML = fmtRpm(num(best.rpm));
+    $("cpu-fan-sub").innerHTML = "rpm" +
+      (num(best.pwm_percent) === null ? "" : " &middot; " + Math.round(num(best.pwm_percent)) + "%") +
+      " &middot; " + fanMode(best);
+  }
+
+  function setGpuFan(fan) {
+    var ch = fan && fan.channels && fan.channels.length ? fan.channels[0] : null;
+    var rpm = ch ? num(ch.rpm) : null;
+    var pwm = ch ? num(ch.pwm_percent) : null;
+    $("gpu-fan").innerHTML = rpm === null ? "--" : fmtRpm(rpm);
+    $("gpu-fan-sub").innerHTML = (rpm === null ? "rpm off" : "rpm") +
+      (pwm === null ? "" : " &middot; " + Math.round(pwm) + "%") +
+      " &middot; " + fanMode(ch);
+  }
+
+  function estimateWatts(gpuW, cpuPct) {
+    var cpu = 13 + (cpuPct === null ? 0 : cpuPct) * 1.45;
+    return Math.round(((gpuW === null ? 0 : gpuW) + cpu + 55) / 0.92);
+  }
+
+  function pollStats() {
+    get("/api/stats", function (err, d) {
+      if (err || !d) return;
+      lastOk = new Date().getTime();
+
+      var gpu = d.gpu || {};
+      var cpu = d.cpu || {};
+      var mem = d.memory || {};
+      var cpuPct = num(d.cpu_percent);
+      var gpuPct = num(gpu.gpu_utilization_percent);
+      var gpuW = num(gpu.power_draw_w);
+      var wallW = estimateWatts(gpuW, cpuPct);
+      var cpuTemp = num(cpu.package_temperature_c);
+      var cpuMax = num(cpu.max_c);
+      var gpuTemp = num(gpu.temperature_c);
+      var mhz = num(cpu.frequency_clock_mhz);
+      if (mhz === null) mhz = num(cpu.frequency_mhz);
+      var peak = num(cpu.frequency_peak_mhz);
+
+      setTemp("cpu-temp-box", "cpu-temp", cpuTemp, "cpu");
+      setTemp("gpu-temp-box", "gpu-temp", gpuTemp, "gpu");
+      $("mhz-chip").innerHTML = fmtClock(mhz);
+      $("wall-chip").innerHTML = "~" + wallW + " W";
+
+      setCpuFan(cpu.fan || {});
+      setGpuFan(gpu.fan || {});
+      setBar("cpu-fill", "cpu-pct", cpuPct);
+      setBar("gpu-fill", "gpu-pct", gpuPct);
+      setBar("ram-fill", "ram-pct", num(mem.percent));
+      var vt = num(gpu.memory_total_mb), vu = num(gpu.memory_used_mb);
+      setBar("vram-fill", "vram-pct", (vt && vu !== null) ? (vu / vt * 100) : null);
+
+      warningText = (d.warnings && d.warnings.length) ? d.warnings[0] : "";
+      renderFoot(cpuPct, gpuPct, gpuW);
+    });
+  }
+
+  function renderFoot(cpuPct, gpuPct, gpuW) {
+    if (warningText) {
+      $("foot").className = "foot crit";
+      $("foot").innerHTML = warningText;
+      return;
+    }
+    $("foot").className = "foot";
+    $("foot").innerHTML = servicesHtml || ("CPU " + fmtPct(cpuPct) + " &middot; GPU " +
+      fmtPct(gpuPct) + " &middot; " + fmtWatts(gpuW) + " GPU");
+  }
+
+  var SVC_NAMES = { ollama: "Ollama", open_webui: "Web",
+                    comfyui: "Comfy", searxng: "SearX", media: "Media", jellyfin: "Jelly" };
+
+  function pollServices() {
+    get("/api/services", function (err, d) {
+      if (err || !d || !d.services) return;
+      var html = "";
+      for (var i = 0; i < d.services.length; i++) {
+        var s = d.services[i];
+        html += '<span class="svc"><span class="sdot' + (s.up ? " on" : "") + '"></span>' +
+          (SVC_NAMES[s.id] || s.name || s.id) + "</span>";
+      }
+      servicesHtml = html;
+      if (!warningText) {
+        $("foot").className = "foot";
+        $("foot").innerHTML = servicesHtml;
+      }
+    });
+  }
+
+  function tickLive() {
+    var age = (new Date().getTime() - lastOk) / 1000;
+    var on = lastOk > 0 && age < 10;
+    $("live-dot").className = "dot" + (on ? " on" : "");
+    $("live-tx").innerHTML = on ? "DOBBY" : "OFFLINE";
+    if (lastOk > 0 && age >= 10) $("foot").innerHTML = "last update " + Math.round(age) + "s ago";
+  }
+
+  pollStats();
+  pollServices();
+  setInterval(pollStats, 2500);
+  setInterval(pollServices, 20000);
+  setInterval(tickLive, 1000);
+})();
+</script>
+</body>
+</html>

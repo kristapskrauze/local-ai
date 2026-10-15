@@ -1,0 +1,48 @@
+# Conservative on purpose. This repo has ~1200 style findings under ruff's
+# wider rule sets (1606 printf-format, 876 blind-except, 511 regex-flag-alias)
+# and none of them are why anything is broken. Turning those on would bury the
+# findings that matter and make the checker something to route around.
+#
+# What is selected is the class that finds defects, and on the first run it
+# found two: `log.warning` in a module that defines LOGGER (so the F5-voice
+# failure warning raised NameError instead of warning), and a lookup of
+# _GROUP_FALLBACK_EMOJI, a name that appears exactly once in 23k lines and was
+# never defined. Both were live crashes on fallback paths.
+
+target-version = "py314"
+line-length = 100
+
+extend-exclude = [
+    ".ai_memory",
+    ".messaging_history",
+    "unsloth_compiled_cache",
+    "eval",
+    "train",
+    "artifacts",
+    "_old_backups",
+]
+
+[lint]
+# E9  syntax/IO errors        F   pyflakes: undefined names, unused imports
+# B   bugbear: mutable defaults, except-clause ordering, misuse that bites
+select = ["E9", "F", "B"]
+
+# Not style opinions -- each of these fires in the hundreds here on patterns
+# the codebase uses deliberately.
+ignore = [
+    "B008",   # function call in argument default: FastAPI's Depends() idiom
+    "B011",   # assert False
+    "B905",   # zip() without strict=, everywhere, harmless here
+]
+
+[lint.per-file-ignores]
+# Suites bind names for readability and print them; unused locals there are
+# not defects.
+"tests/**" = ["F841"]
+
+[format]
+# Present only so the formatter's own settings are explicit if it is ever run
+# by hand. It is NOT wired into the agent -- see AGENTS.md rule 1 and the
+# formatter entry in ~/.config/opencode/opencode.jsonc, which disables it.
+quote-style = "double"
+indent-style = "space"

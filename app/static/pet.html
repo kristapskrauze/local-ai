@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Pet">
+<title>System Pet</title>
+<!-- iPhone 4S / iOS 9 Safari. ES5 only, XMLHttpRequest (no fetch), no CSS
+     custom properties, no calc()/env()/clamp(), no flexbox/grid, no CSS
+     transforms on SVG child elements. All creature colour/shape is set from
+     JS via setAttribute / style. Same rules as mini.html. -->
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { width:100%; height:100%; overflow:hidden; }
+  body {
+    background:#05070d;
+    font-family:-apple-system,"Helvetica Neue",Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    -webkit-user-select:none; user-select:none;
+  }
+
+  #bg {
+    position:absolute; left:0; top:0; right:0; bottom:0; z-index:0; overflow:hidden;
+    background:#0a1522;
+    background:-webkit-linear-gradient(top, #16283c 0%, #0a1524 55%, #05090f 100%);
+    background:linear-gradient(to bottom, #16283c 0%, #0a1524 55%, #05090f 100%);
+  }
+  #vig {
+    position:absolute; left:0; top:0; right:0; bottom:0;
+    background:-webkit-radial-gradient(center, circle farthest-side, rgba(0,0,0,0) 40%, rgba(0,0,0,0.5) 100%);
+    background:radial-gradient(circle farthest-side at 50% 46%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.5) 100%);
+  }
+  #glow {
+    position:absolute; left:50%; top:46%; width:340px; height:340px;
+    margin-left:-170px; margin-top:-170px; border-radius:50%; opacity:.6;
+    background:-webkit-radial-gradient(center, circle, rgba(90,150,210,0.30) 0%, rgba(90,150,210,0) 62%);
+    background:radial-gradient(circle at center, rgba(90,150,210,0.30) 0%, rgba(90,150,210,0) 62%);
+  }
+
+  .mote {
+    position:absolute; border-radius:50%; background:rgba(150,200,255,0.55);
+    -webkit-animation:drift linear infinite; animation:drift linear infinite;
+  }
+  @-webkit-keyframes drift {
+    0%{-webkit-transform:translate(0,0);opacity:0}
+    15%{opacity:.6} 85%{opacity:.6}
+    100%{-webkit-transform:translate(30px,-90px);opacity:0}
+  }
+  @keyframes drift {
+    0%{transform:translate(0,0);opacity:0}
+    15%{opacity:.6} 85%{opacity:.6}
+    100%{transform:translate(30px,-90px);opacity:0}
+  }
+
+  #stage {
+    position:absolute; left:0; right:0; top:0; bottom:0; z-index:2;
+    text-align:center;
+  }
+  #petwrap { display:block; position:relative; top:0; }
+  #petsvg { display:block; margin:0 auto; overflow:visible; }
+
+  #readout {
+    position:absolute; left:0; right:0; bottom:0; z-index:5;
+    padding:7px 10px 11px; text-align:center;
+    color:#7c92a4; font-size:11px; font-weight:700;
+    letter-spacing:.02em; line-height:15px; word-spacing:1px;
+    background:-webkit-linear-gradient(top, rgba(5,8,13,0) 0%, rgba(5,8,13,0.82) 42%, rgba(5,8,13,0.92) 100%);
+    background:linear-gradient(to bottom, rgba(5,8,13,0) 0%, rgba(5,8,13,0.82) 42%, rgba(5,8,13,0.92) 100%);
+    text-shadow:0 1px 3px rgba(0,0,0,.9);
+  }
+  #readout b { color:#a9c0d2; font-weight:700; }
+  #readout .warn { color:#ff9a4d; }
+  #readout .sep { color:#3f4d5a; }
+  @media (orientation: portrait) {
+    #readout { font-size:10px; line-height:14px; padding:6px 8px 12px; }
+  }
+  #ver { position:absolute; left:5px; bottom:4px; z-index:9; font-size:9px;
+         color:#3c4a58; font-weight:700; letter-spacing:.05em; }
+</style>
+</head>
+<body>
+  <div id="bg"><div id="vig"></div></div>
+  <div id="glow"></div>
+  <div id="motes"></div>
+  <div id="ver">v7 &middot; tap</div>
+
+  <div id="stage"><div id="petwrap">
+    <svg id="petsvg" viewBox="0 0 200 210" width="300" height="315">
+      <ellipse id="shadow" cx="100" cy="196" rx="52" ry="9" fill="#000" opacity="0.28"/>
+
+      <g id="earLg">
+        <path id="earL"  d="M62 62 C44 32 40 20 52 18 C66 16 78 42 82 60 Z" fill="#4aa6d8" stroke="#1f5f86" stroke-width="3"/>
+        <path id="earLi" d="M60 54 C50 36 48 28 55 27 C64 26 72 44 74 56 Z" fill="rgba(230,120,150,0.45)"/>
+      </g>
+      <g id="earRg">
+        <path id="earR"  d="M138 62 C156 32 160 20 148 18 C134 16 122 42 118 60 Z" fill="#4aa6d8" stroke="#1f5f86" stroke-width="3"/>
+        <path id="earRi" d="M140 54 C150 36 152 28 145 27 C136 26 128 44 126 56 Z" fill="rgba(230,120,150,0.45)"/>
+      </g>
+
+      <ellipse id="footL" cx="74" cy="186" rx="18" ry="11" fill="#3f9bd0" stroke="#1f5f86" stroke-width="3"/>
+      <ellipse id="footR" cx="126" cy="186" rx="18" ry="11" fill="#3f9bd0" stroke="#1f5f86" stroke-width="3"/>
+
+      <g id="bodyG">
+        <path id="body" d="M100 42 C150 42 168 80 168 120 C168 160 140 184 100 184 C60 184 32 160 32 120 C32 80 50 42 100 42 Z"
+              fill="#4aa6d8" stroke="#1f5f86" stroke-width="3"/>
+      </g>
+      <ellipse id="belly" cx="100" cy="134" rx="40" ry="34" fill="rgba(210,235,250,0.55)"/>
+
+      <ellipse id="armL" cx="40" cy="130" rx="14" ry="20" fill="#3f9bd0" stroke="#1f5f86" stroke-width="3" transform="rotate(20 40 130)"/>
+      <ellipse id="armR" cx="160" cy="130" rx="14" ry="20" fill="#3f9bd0" stroke="#1f5f86" stroke-width="3" transform="rotate(-20 160 130)"/>
+
+      <ellipse id="cheekL" cx="70" cy="120" rx="10" ry="6" fill="rgba(240,120,150,0.5)"/>
+      <ellipse id="cheekR" cx="130" cy="120" rx="10" ry="6" fill="rgba(240,120,150,0.5)"/>
+
+      <g id="eyeL">
+        <ellipse id="eyeLo" cx="78" cy="106" rx="11" ry="13" fill="#141a26"/>
+        <circle id="eyeLp" cx="78" cy="107" r="6.5" fill="#0a0e17"/>
+        <circle id="eyeLs" cx="75" cy="103" r="2.6" fill="#ffffff"/>
+      </g>
+      <g id="eyeR">
+        <ellipse id="eyeRo" cx="122" cy="106" rx="11" ry="13" fill="#141a26"/>
+        <circle id="eyeRp" cx="122" cy="107" r="6.5" fill="#0a0e17"/>
+        <circle id="eyeRs" cx="119" cy="103" r="2.6" fill="#ffffff"/>
+      </g>
+
+      <path id="mouth" d="M88 130 Q100 142 112 130" fill="none" stroke="#141a26" stroke-width="3.4" stroke-linecap="round"/>
+
+      <path id="zz1" d="M150 60 h14 l-14 12 h14" fill="none" stroke="#9fc4dd" stroke-width="3" stroke-linecap="round" opacity="0"/>
+      <path id="zz2" d="M164 46 h10 l-10 9 h10" fill="none" stroke="#9fc4dd" stroke-width="3" stroke-linecap="round" opacity="0"/>
+      <g id="think" opacity="0">
+        <circle cx="150" cy="70" r="3" fill="#cfe6f5"/>
+        <circle cx="159" cy="60" r="4.5" fill="#cfe6f5"/>
+        <circle cx="171" cy="48" r="6.5" fill="#cfe6f5"/>
+      </g>
+      <circle id="emoteBg" cx="171" cy="40" r="17" fill="rgba(12,20,34,0.72)" stroke="#2e3a52" stroke-width="1.5" opacity="0"/>
+      <text id="emote" x="171" y="48" font-size="21" text-anchor="middle" opacity="0">🔍</text>
+    </svg>
+  </div></div>
+
+  <div id="readout">waking up&hellip;</div>
+
+<script>
+(function () {
+  "use strict";
+
+  function $(id) { return document.getElementById(id); }
+  function num(v) { return (typeof v === "number" && isFinite(v)) ? v : null; }
+  function clamp(v, a, b) { return v == null ? a : Math.max(a, Math.min(b, v)); }
+
+  var svg = $("petsvg");
+  var wrap = $("petwrap");
+  var glow = $("glow");
+  var readout = $("readout");
+
+  // ---- JS-driven idle animation (iOS 9 Safari does not reliably run CSS
+  //      keyframe animations here, so the movement is done by hand) ----------
+  var bobPeriod = 3.4, glowPeriod = 2.6, bobAmp = 9, animT = 0, TAU = Math.PI * 2;
+  function anim() {
+    animT += 0.06;
+    var y = Math.sin(animT * TAU / bobPeriod);
+    wrap.style.top = (-bobAmp - y * bobAmp) + "px";
+    var p = 0.5 + 0.5 * Math.sin(animT * TAU / glowPeriod);
+    glow.style.opacity = (0.5 + 0.42 * p).toFixed(3);
+    if (sleeping) {
+      $("zz1").setAttribute("opacity", (0.35 + 0.5 * p).toFixed(2));
+      $("zz2").setAttribute("opacity", (0.15 + 0.45 * (1 - p)).toFixed(2));
+    } else if (activity === "tool" && /search|research|read|imagery|classif|media/.test(actDetail)) {
+      gazeT += 0.16;
+      gaze(Math.sin(gazeT) * 3.2, Math.cos(gazeT * 0.6));   // darting look
+    } else if (activity === "thinking" || activity === "reasoning") {
+      gazeT += 0.05;
+      gaze(2.2 + Math.sin(gazeT) * 0.8, -2.6);
+    }
+  }
+  setInterval(anim, 55);
+
+  var RESERVE = 46; // px kept clear at top+bottom for the status bar / readout
+  function fit() {
+    var w = window.innerWidth || document.documentElement.clientWidth;
+    var h = window.innerHeight || document.documentElement.clientHeight;
+    var avail = h - RESERVE * 2;
+    // fit by the smaller of: width, or the height we have after the reserves
+    var s = Math.round(Math.min(w * 0.86, avail * 200 / 210, Math.min(w, h) * 0.9));
+    if (s < 110) s = 110;
+    svg.setAttribute("width", s);
+    var sh = Math.round(s * 210 / 200);
+    svg.setAttribute("height", sh);
+    // vertical centre within the reserved band, biased slightly up
+    var pad = Math.max(RESERVE, Math.round((h - sh) / 2) - 6);
+    $("stage").style.paddingTop = pad + "px";
+  }
+  fit();
+  if (window.addEventListener) {
+    window.addEventListener("resize", fit, false);
+    window.addEventListener("orientationchange", function () { setTimeout(fit, 120); }, false);
+  }
+
+  (function () {
+    var box = $("motes");
+    for (var i = 0; i < 12; i++) {
+      var m = document.createElement("div");
+      m.className = "mote";
+      var sz = 2 + Math.floor(Math.random() * 4);
+      m.style.width = sz + "px";
+      m.style.height = sz + "px";
+      m.style.left = Math.floor(Math.random() * 100) + "%";
+      m.style.top = Math.floor(Math.random() * 100) + "%";
+      var dur = (9 + Math.floor(Math.random() * 12));
+      m.style.webkitAnimationDuration = dur + "s";
+      m.style.animationDuration = dur + "s";
+      m.style.webkitAnimationDelay = "-" + Math.floor(Math.random() * 12) + "s";
+      m.style.animationDelay = "-" + Math.floor(Math.random() * 12) + "s";
+      box.appendChild(m);
+    }
+  })();
+
+  function get(url, cb) {
+    var x = new XMLHttpRequest();
+    x.open("GET", url, true);
+    x.timeout = 7000;
+    x.onreadystatechange = function () {
+      if (x.readyState !== 4) return;
+      if (x.status === 200) {
+        try { cb(null, JSON.parse(x.responseText)); } catch (e) { cb(e, null); }
+      } else { cb(new Error("http " + x.status), null); }
+    };
+    x.ontimeout = function () { cb(new Error("timeout"), null); };
+    try { x.send(); } catch (e) { cb(e, null); }
+  }
+
+  function hsl(h, s, l) {
+    h = ((h % 360) + 360) % 360; s /= 100; l /= 100;
+    var c = (1 - Math.abs(2 * l - 1)) * s;
+    var x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+    var m = l - c / 2, r = 0, g = 0, b = 0;
+    if (h < 60) { r = c; g = x; }
+    else if (h < 120) { r = x; g = c; }
+    else if (h < 180) { g = c; b = x; }
+    else if (h < 240) { g = x; b = c; }
+    else if (h < 300) { r = x; b = c; }
+    else { r = c; b = x; }
+    return "rgb(" + Math.round((r + m) * 255) + "," + Math.round((g + m) * 255) + "," + Math.round((b + m) * 255) + ")";
+  }
+
+  var BODY = ["body", "earL", "earR"];
+  var LIMB = ["footL", "footR", "armL", "armR"];
+
+  function paint(bodyCol, limbCol, strokeCol, bellyCol) {
+    var i;
+    for (i = 0; i < BODY.length; i++) { $(BODY[i]).setAttribute("fill", bodyCol); $(BODY[i]).setAttribute("stroke", strokeCol); }
+    for (i = 0; i < LIMB.length; i++) { $(LIMB[i]).setAttribute("fill", limbCol); $(LIMB[i]).setAttribute("stroke", strokeCol); }
+    $("belly").setAttribute("fill", bellyCol);
+  }
+
+  function eyesOpen(open) {
+    var ry = open ? 13 : 1.4;
+    $("eyeLo").setAttribute("ry", ry);
+    $("eyeRo").setAttribute("ry", ry);
+    var o = open ? 1 : 0;
+    $("eyeLp").setAttribute("opacity", o); $("eyeLs").setAttribute("opacity", o);
+    $("eyeRp").setAttribute("opacity", o); $("eyeRs").setAttribute("opacity", o);
+  }
+  function mouth(kind) {
+    var d = kind === "smile" ? "M88 130 Q100 143 112 130"
+          : kind === "grin"  ? "M85 128 Q100 148 115 128"
+          : kind === "open"  ? "M91 127 Q100 146 109 127"
+          : kind === "o"     ? "M94 131 Q100 141 106 131 Q100 137 94 131 Z"
+          : kind === "worry" ? "M89 134 Q100 128 111 134"
+          :                    "M90 132 Q100 134 110 132"; // flat
+    $("mouth").setAttribute("d", d);
+  }
+
+  /* pupils/shine offset for a gaze direction */
+  function gaze(dx, dy) {
+    dx = dx || 0; dy = dy || 0;
+    $("eyeLp").setAttribute("cx", 78 + dx); $("eyeLp").setAttribute("cy", 107 + dy);
+    $("eyeRp").setAttribute("cx", 122 + dx); $("eyeRp").setAttribute("cy", 107 + dy);
+    $("eyeLs").setAttribute("cx", 75 + dx); $("eyeLs").setAttribute("cy", 103 + dy);
+    $("eyeRs").setAttribute("cx", 119 + dx); $("eyeRs").setAttribute("cy", 103 + dy);
+  }
+  function ears(mode) {
+    var l = "", r = "";
+    if (mode === "perk") { l = "rotate(-16 66 60)"; r = "rotate(16 134 60)"; }
+    else if (mode === "down") { l = "rotate(24 66 60)"; r = "rotate(-24 134 60)"; }
+    $("earLg").setAttribute("transform", l);
+    $("earRg").setAttribute("transform", r);
+  }
+  var emoteCur = "";
+  function emote(ch) {
+    var e = $("emote"), bg = $("emoteBg");
+    if (ch) {
+      if (ch !== emoteCur) {            // pop when it changes (attr, not CSS transform)
+        e.setAttribute("font-size", "30");
+        setTimeout(function () { e.setAttribute("font-size", "21"); }, 160);
+      }
+      e.textContent = ch; e.setAttribute("opacity", "1"); bg.setAttribute("opacity", "1");
+    } else {
+      e.setAttribute("opacity", "0"); bg.setAttribute("opacity", "0");
+    }
+    emoteCur = ch;
+  }
+  function showThink(on) { $("think").setAttribute("opacity", on ? "1" : "0"); }
+
+  function setSpeed(bob, glow) { bobPeriod = bob; glowPeriod = glow; }
+
+  /* ---- activity mood: react to what the assistant is doing ----
+     driven by GET /api/pulse. Only meaningful while AWAKE. */
+  var activity = "idle", actDetail = "", gazeT = 0;
+  var lastTool = "", lastToolAt = 0;
+  var TOOL_HOLD_MS = 6000;
+  var TOOL_EMOTE = {
+    web_search: "🔍", research: "🔍", web_read: "📄",
+    street_imagery: "👁", search_chat_history: "💬",
+    search_personal_memory: "💭", calendar_search: "📅",
+    calendar_create: "📅", antons_read_code: "💻",
+    antons_investigate: "🔎", antons_propose_fix: "🔧",
+    antons_apply_fix: "🔨", antons_build: "🛠",
+    antons_run_tests: "✅", classifieds_search: "🚗",
+    media_library_search: "🎬", transcribe_audio: "🎧",
+    send_message: "✉️"
+  };
+  function applyMood() {
+    if (sleeping || upsetNow) { return; }
+    var a = activity;
+    if (a === "tool") { lastTool = actDetail || ""; lastToolAt = +new Date(); }
+    var held = (a === "thinking" || a === "reasoning" || a === "speaking")
+             && lastTool && (+new Date() - lastToolAt) < TOOL_HOLD_MS
+             ? (TOOL_EMOTE[lastTool] || "⚙️") : "";
+    if (a === "listening") {
+      ears("perk"); gaze(0, -1.6); mouth("smile"); showThink(false); emote("");
+      bobPeriod = 2.4;
+    } else if (a === "thinking" || a === "reasoning") {
+      ears("normal"); gaze(2.2, -2.6); mouth("flat");
+      showThink(!held); emote(held);
+      bobPeriod = 2.0; glowPeriod = 1.4;
+    } else if (a === "tool") {
+      ears("perk"); showThink(false);
+      emote(TOOL_EMOTE[actDetail] || "⚙️");
+      var searchy = /search|research|read|imagery|classif|media/.test(actDetail);
+      if (searchy) { gaze(Math.sin(gazeT) * 3, 0); mouth("flat"); }
+      else { gaze(1.5, 1.5); mouth("flat"); }        // concentrating
+      bobPeriod = 1.8;
+    } else if (a === "building" || a === "polishing") {
+      ears("normal"); gaze(1.2, 2); mouth("flat"); showThink(false);
+      emote("🛠"); bobPeriod = 1.5; glowPeriod = 1.1;
+    } else if (a === "speaking") {
+      ears("normal"); gaze(0, 0); mouth("open"); showThink(false); emote(held);
+      bobPeriod = 1.9;
+    } else if (a === "built") {
+      ears("perk"); gaze(0, 0); mouth("grin"); showThink(false);
+      emote("✨"); bobPeriod = 1.4;
+    } else if (a === "error") {
+      ears("down"); gaze(0, 2.5); mouth("worry"); showThink(false);
+      emote("⚠️"); bobPeriod = 1.2;
+    } else {                                            // idle
+      ears("normal"); gaze(0, 0); showThink(false); emote("");
+      mouth("smile");
+    }
+  }
+  function pollPulse() {
+    var x = new XMLHttpRequest();
+    x.open("GET", "/api/pulse", true);
+    x.timeout = 5000;
+    x.onreadystatechange = function () {
+      if (x.readyState !== 4) return;
+      if (x.status === 200) {
+        try {
+          var d = JSON.parse(x.responseText);
+          activity = d.state || "idle";
+          actDetail = d.detail || "";
+        } catch (e) {}
+      }
+      applyMood();
+    };
+    try { x.send(); } catch (e) {}
+  }
+
+  var stats = null, statsOk = false, hadStats = false, statsFails = 0;
+  var modelName = null, modelKnown = false, modelFails = 0;
+  var sleeping = false, blinkClosed = false, upsetNow = false;
+
+  var CHRONIC = /disk|drive|[a-z]:\s|vram|memory|\bram\b|swap/i;
+  function realWarnings(w) {
+    var out = [];
+    if (!w || !w.length) return out;
+    for (var i = 0; i < w.length; i++) {
+      if (typeof w[i] === "string" && w[i] && !CHRONIC.test(w[i])) out.push(w[i]);
+    }
+    return out;
+  }
+
+  function fmtUp(sec) {
+    if (sec == null) return null;
+    var s = Math.floor(sec), h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60);
+    return "up " + (h > 0 ? h + "h " : "") + m + "m";
+  }
+
+  function render() {
+    var noModel = modelKnown && !modelName;
+    var lostSignal = !statsOk && hadStats && statsFails >= 5;
+    var asleep = noModel || (lostSignal && !modelName);
+    var neverUp = !statsOk && !hadStats && statsFails < 5;
+    sleeping = asleep;
+
+    if (neverUp) {
+      paint("#4aa6d8", "#3f9bd0", "#1f5f86", "rgba(210,235,250,0.55)");
+      eyesOpen(!blinkClosed); mouth("smile");
+      setSpeed(3.4, 2.6);
+      readout.innerHTML = "listening&hellip;";
+      return;
+    }
+
+    if (asleep) {
+      paint("#5b7285", "#516375", "#33414c", "rgba(200,215,225,0.4)");
+      eyesOpen(false); mouth("flat");
+      setSpeed(5.2, 4.6);
+      svg.style.opacity = "0.82";
+      $("zz1").setAttribute("opacity", "0.85");
+      $("zz2").setAttribute("opacity", "0.6");
+      var why = (statsFails >= 5) ? "signal lost"
+              : (modelKnown && !modelName) ? "assistant sleeping" : "signal lost";
+      readout.innerHTML = '<span class="warn">zzz &mdash; ' + why + "</span>";
+      return;
+    }
+
+    // ---- AWAKE ----
+    svg.style.opacity = "1";
+    $("zz1").setAttribute("opacity", "0");
+    $("zz2").setAttribute("opacity", "0");
+
+    var d = stats || {};
+    var g = d.gpu || {}, c = d.cpu || {}, mem = d.memory || {};
+    var util = clamp(num(g.gpu_utilization_percent), 0, 100);
+    var temp = num(g.temperature_c);
+    var vu = num(g.memory_used_mb), vt = num(g.memory_total_mb);
+    var cpu = num(d.cpu_percent);
+    if (cpu == null && c.per_core_percent && c.per_core_percent.length) {
+      var sum = 0, k;
+      for (k = 0; k < c.per_core_percent.length; k++) sum += (num(c.per_core_percent[k]) || 0);
+      cpu = sum / c.per_core_percent.length;
+    }
+    cpu = clamp(cpu, 0, 100);
+    var memPct = clamp(num(mem.percent), 0, 100);
+    var warns = realWarnings(d.warnings);
+    var hot = temp != null && temp > 85;
+    var upset = warns.length > 0 || hot;
+
+    // colour: calm teal in the normal band, warms to amber only when genuinely hot
+    var t = temp == null ? 0.15 : clamp((temp - 45) / 40, 0, 1);
+    var hue = 200 - t * 168;          // 200 teal -> 32 amber
+    var sat = upset ? 82 : 60 + t * 22;
+    if (upset) hue = 18;
+    var bodyCol = hsl(hue, sat, 56);
+    var limbCol = hsl(hue, sat, 50);
+    var strokeCol = hsl(hue, sat - 20, 28);
+    var bellyCol = upset ? "rgba(255,225,210,0.5)" : "rgba(210,235,250,0.55)";
+    paint(bodyCol, limbCol, strokeCol, bellyCol);
+    var gc = hsl(hue, sat, 60).replace("rgb(", "rgba(").replace(")", ",0.32)");
+    var gc0 = hsl(hue, sat, 60).replace("rgb(", "rgba(").replace(")", ",0)");
+    glow.style.background = "radial-gradient(circle, " + gc + " 0%, " + gc0 + " 62%)";
+    glow.style.background = "-webkit-radial-gradient(center, circle, " + gc + " 0%, " + gc0 + " 62%)";
+
+    // energy: gpu util -> bob + glow speed
+    setSpeed(3.4 - (util / 100) * 2.2, glowPeriod);
+    // heartbeat: cpu -> glow pulse speed
+    glowPeriod = 2.6 - (cpu / 100) * 1.8;
+
+    // heaviness from RAM (SVG transform ATTRIBUTE, which iOS 9 does support)
+    var sc = (1 + (memPct / 100) * 0.06).toFixed(3);
+    $("bodyG").setAttribute("transform", "translate(100 112) scale(" + sc + ") translate(-100 -112)");
+
+    eyesOpen(!blinkClosed);
+    upsetNow = upset;
+    if (upset) {
+      mouth("worry"); ears("down"); gaze(0, 2.5); emote("⚠️"); showThink(false);
+    } else if (activity && activity !== "idle") {
+      applyMood();                       // the AI's activity drives the face
+    } else {
+      mouth(util > 70 ? "open" : util < 10 ? "flat" : "smile");
+      ears("normal"); gaze(0, 0); emote(""); showThink(false);
+    }
+
+    var nm = (modelName ? modelName : "ready").replace(/[<&]/g, "").replace(/:latest$/, "");
+    var parts = [];
+    parts.push("<b>" + nm + "</b>");
+    if (temp != null) parts.push(Math.round(temp) + "°");
+    parts.push("gpu " + Math.round(util));
+    if (vu != null && vt != null) parts.push((vu / 1024).toFixed(1) + "/" + Math.round(vt / 1024) + "G");
+    parts.push("cpu " + Math.round(cpu));
+    var up = fmtUp(num(d.uptime_seconds));
+    if (up) parts.push(up.replace("up ", ""));
+    var html = parts.join('<span class="sep"> &middot; </span>');
+    if (upset) html += '<br><span class="warn">&#9888; ' + (hot ? "GPU " + Math.round(temp) + "°C" : warns[0].replace(/[<&]/g, "")) + "</span>";
+    readout.innerHTML = html;
+  }
+
+  function blink() {
+    if (!sleeping) {
+      blinkClosed = true; eyesOpen(false);
+      setTimeout(function () { blinkClosed = false; eyesOpen(true); }, 130);
+    }
+    setTimeout(blink, 2600 + Math.floor(Math.random() * 4200));
+  }
+  setTimeout(blink, 1800);
+
+  function pollStats() {
+    get("/api/stats", function (err, d) {
+      if (err || !d) {
+        // one slow poll (nvidia-smi lags while the GPU is pegged -- which is
+        // exactly when the creature should be MOST alive) must not knock it
+        // out. Keep the last reading; only a sustained outage counts.
+        statsFails++;
+        if (statsFails >= 5) statsOk = false;
+        render();
+        return;
+      }
+      statsFails = 0;
+      stats = d; statsOk = true; hadStats = true; render();
+    });
+  }
+  function pollModel() {
+    get("/api/ollama/models", function (err, j) {
+      if (err || !j) {
+        modelFails++;
+        // both endpoints dark for ~15s = the box or service is really gone
+        if (modelFails >= 5 && statsFails >= 5) { modelName = null; render(); }
+        return;
+      }
+      modelFails = 0;
+      var loaded = (j && j.loaded && j.loaded.length) ? j.loaded : [];
+      var name = null;
+      for (var i = 0; i < loaded.length; i++) {
+        var e = loaded[i] || {};
+        var nm = e.name || e.model || "";
+        if (nm.indexOf("qwen") === 0 && (e.size_vram == null || e.size_vram > 0)) { name = nm; break; }
+      }
+      modelName = name; modelKnown = true; render();
+    });
+  }
+
+  // tap the version tag to force a fresh reload (homescreen webviews cache hard)
+  $("ver").onclick = function () {
+    try { location.replace("/pet?t=" + (new Date()).getTime()); }
+    catch (e) { location.reload(true); }
+  };
+
+  pollModel(); pollStats(); pollPulse();
+  setInterval(pollStats, 2000);
+  setInterval(pollModel, 3000);
+  setInterval(pollPulse, 1400);
+})();
+</script>
+</body>
+</html>

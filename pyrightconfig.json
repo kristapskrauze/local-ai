@@ -1,0 +1,25 @@
+{
+  "pythonVersion": "3.14",
+  "pythonPlatform": "Windows",
+  "typeCheckingMode": "basic",
+  "include": [
+    "app",
+    "tests",
+    "scripts",
+    "_tools"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    "**/node_modules",
+    ".ai_memory",
+    ".messaging_history",
+    "unsloth_compiled_cache",
+    "eval",
+    "train",
+    "artifacts"
+  ],
+  "reportMissingImports": "error",
+  "reportMissingModuleSource": "none",
+  "reportSelfClsParameterName": "none",
+  "reportUnsupportedDunderAll": "none"
+}

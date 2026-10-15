@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover,interactive-widget=resizes-content">
+<meta name="theme-color" content="#0d1117">
+<meta name="apple-mobile-web-app-title" content="Dobby Console">
+<title>Dobby Console</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=65">
+<link rel="stylesheet" href="/static/styles.css?v=70">
+</head>
+<body data-app="console">
+
+<div class="app">
+  <header class="hdr">
+    <div class="hdr-left">
+      <h1 class="rig">Dobby Console</h1>
+      <span id="host" class="host">connecting...</span>
+    </div>
+    <div class="hdr-right">
+      <span id="status-pill" class="pill live">Checking</span>
+      <span id="last-updated" class="updated">--:--:--</span>
+      <a class="btn-icon app-switch" href="/me" title="Personal: assistant, goals, memory, messages">Personal</a>
+      <button id="btn-cmdk" class="btn-icon cmdk-btn" aria-label="Command palette" title="Command palette (Ctrl/Cmd-K)">&#x2318;K</button>
+      <button id="btn-pause" class="btn-icon" aria-label="Pause">&#x23F8;</button>
+      <button id="btn-refresh" class="btn-icon" aria-label="Refresh">&#x21BB;</button>
+    </div>
+    <!-- full-width row of its own: five pills fit across a phone here, but
+         only two fit in the space left beside the buttons -->
+    <div id="hdr-vitals" class="hdr-vitals"></div>
+  </header>
+
+  <nav class="bnav" id="bnav">
+    <button class="nb active" data-t="overview">Overview</button>
+    <button class="nb" data-t="code">Code</button>
+    <button class="nb" data-t="aihub">AI Hub</button>
+    <button class="nb" data-t="studio">Studio</button>
+    <button class="nb" data-t="media">Media</button>
+    <button class="nb" data-t="terminal">Terminal</button>
+    <button class="nb" data-t="system">System</button>
+  </nav>
+
+  <main class="content" id="main">
+    <section id="overview" class="sec active">
+      <div class="hero" id="hero"></div>
+      <div id="warn-card"></div>
+      <div id="ov-eco"></div>
+      <div id="ov-assistant"></div>
+      <div class="ogrid" id="ov-extra"></div>
+    </section>
+
+    <section id="code" class="sec">
+      <div class="code-shell glass">
+        <div class="code-head">
+          <div>
+            <div class="code-title">Code</div>
+            <div id="code-sub" class="code-mode-help">Tell the local AI what to change. It edits, validates, and can roll back.</div>
+          </div>
+          <button id="code-refresh" class="btn-sm btn-ghost" type="button">Refresh</button>
+        </div>
+        <div id="opencode-status" class="opencode-status">checking runner status...</div>
+        <div class="code-top">
+          <select id="code-target" class="chat-select" aria-label="Target"></select>
+          <button id="code-run" class="btn-sm" type="button">Run AI Edit</button>
+        </div>
+        <textarea id="code-task" class="studio-prompt" rows="3"
+          placeholder='e.g. Change the app name in the UI from "Luma" to "Luna"'></textarea>
+        <div class="code-safety">
+          <label class="messaging-check" id="code-deploy-wrap"><input id="code-deploy" type="checkbox" checked /><span>Deploy after edit</span></label>
+          <label class="mediaops-field" id="code-sudo-wrap"><span>Media password</span>
+            <input id="code-sudo" class="mediaops-input" type="password" autocomplete="current-password" placeholder="SSH/sudo fallback, per-run only" />
+          </label>
+          <span id="code-safety-note" class="code-safety-note"></span>
+        </div>
+        <details class="code-adv" id="code-advanced">
+          <summary>Options</summary>
+          <div class="code-adv-grid">
+            <label class="mediaops-field"><span>Mode</span>
+              <div class="seg code-mode" id="code-mode" aria-label="Coding mode">
+                <button class="seg-btn active" type="button" data-code-mode="hybrid">Hybrid</button>
+                <button class="seg-btn" type="button" data-code-mode="local">Local only</button>
+                <button class="seg-btn" type="button" data-code-mode="local_web">Local + Web</button>
+              </div>
+            </label>
+            <label class="mediaops-field"><span>Commit message</span>
+              <input id="code-commit" class="mediaops-input" value="Update via Code tab" />
+            </label>
+          </div>
+        </details>
+        <details class="code-adv" id="code-rollback">
+          <summary>Checks &amp; rollback</summary>
+          <div class="code-actions-list" id="code-actions">
+            <div class="ca-row">
+              <div class="ca-tx"><b>Validate source</b><span>Syntax + deploy-marker checks on the Jellyfin UI files</span></div>
+              <button class="mediaops-action" type="button" data-op="jellyfin-validate-source">Run</button>
+            </div>
+            <div class="ca-row">
+              <div class="ca-tx"><b>Deploy current source</b><span>Validate, push, deploy, and sync the selected media target</span></div>
+              <button class="mediaops-action" type="button" data-op="deploy-target">Deploy</button>
+            </div>
+            <div class="ca-row">
+              <div class="ca-tx"><b>Screenshot check</b><span>Capture the live Jellyfin UI headlessly to eyeball a deploy</span></div>
+              <button class="mediaops-action" type="button" data-op="jellyfin-screenshot">Run</button>
+            </div>
+            <div class="ca-row">
+              <div class="ca-tx"><b>Media status</b><span>Service + stack status on the media box</span></div>
+              <button class="mediaops-action" type="button" data-op="status">Run</button>
+            </div>
+            <div class="ca-row">
+              <div class="ca-tx"><b>Repo status</b><span>git status + recent commits in the shared workspace</span></div>
+              <button class="mediaops-action" type="button" data-op="big-rig-status">Run</button>
+            </div>
+            <div class="ca-row danger">
+              <div class="ca-tx"><b>Reset uncommitted</b><span>Throw away local uncommitted Jellyfin UI edits</span></div>
+              <button class="mediaops-action danger" type="button" data-op="jellyfin-reset-source">Reset</button>
+            </div>
+            <div class="ca-row danger">
+              <div class="ca-tx"><b>Restore last backup</b><span>Push the most recent Jellyfin UI backup back live</span></div>
+              <button class="mediaops-action danger" type="button" data-op="jellyfin-restore-latest">Restore</button>
+            </div>
+            <div class="ca-row danger">
+              <div class="ca-tx"><b>Revert last deploy</b><span>git revert the last commit and redeploy the Jellyfin UI</span></div>
+              <button class="mediaops-action danger" type="button" data-op="jellyfin-revert-deploy">Revert</button>
+            </div>
+          </div>
+        </details>
+        <!-- Step rail: one row per tool call the local agent makes, parsed
+             live from the opencode stream so you can watch it work without
+             reading the raw log. Hidden until the first step lands. -->
+        <div id="code-steps" class="code-steps" hidden></div>
+        <pre id="code-output" class="code-output"></pre>
+
+        <!-- Ask the assistant about its own code. Read-only: the lookups
+             behind this cannot write anything. Proposing a patch is a
+             separate button because a proposal is a document to read, and
+             applying one is a third, because that writes. -->
+        <div class="code-head" style="margin-top:18px">
+          <div>
+            <div class="code-title">Ask about the code</div>
+            <div class="code-mode-help">Where something lives, what uses it, why it behaved that way. Read-only.</div>
+          </div>
+        </div>
+        <div class="code-top">
+          <input id="si-q" class="mediaops-input" style="flex:1"
+                 placeholder="e.g. kur ir kods, kas izlemj vai atbildet uz zinu?" />
+          <button id="si-ask" class="btn-sm" type="button">Ask</button>
+          <button id="si-propose" class="btn-sm btn-ghost" type="button">Propose fix</button>
+        </div>
+        <div id="si-tools" class="opencode-status" style="display:none"></div>
+        <pre id="si-output" class="code-output"></pre>
+        <div id="si-apply-wrap" class="code-top" style="display:none">
+          <button id="si-apply" class="btn-sm" type="button">Apply this patch</button>
+          <span class="code-mode-help">Runs AST, ruff, pyright and the suites. Reverts unless they pass.</span>
+        </div>
+
+        <!-- Which chat can do what: mode, which tools reach it, which risk
+             tiers are structurally open there, and which persona/note source
+             applies. Config-level view — see chat_controls_summary's own
+             docstring for why this isn't a per-message simulation. -->
+        <div class="code-head" style="margin-top:18px">
+          <div>
+            <div class="code-title">Chat controls</div>
+            <div class="code-mode-help">Per chat: mode, reachable tools, risk tiers, persona source.</div>
+          </div>
+          <button id="cc-refresh" class="btn-sm btn-ghost" type="button">Refresh</button>
+        </div>
+        <div id="cc-list" class="code-actions-list"></div>
+      </div>
+    </section>
+
+    <section id="aihub" class="sec">
+      <div id="aihub-card"></div>
+    </section>
+
+    <section id="studio" class="sec">
+      <div class="studio-shell glass">
+        <div id="studio-status" class="studio-status"></div>
+        <div class="studio-controls">
+          <div class="seg" id="studio-mode">
+            <button class="seg-btn active" type="button" data-mode="image">Image</button>
+            <button class="seg-btn" type="button" data-mode="video">Video</button>
+            <button class="seg-btn" type="button" data-mode="edit">Edit</button>
+          </div>
+          <textarea id="studio-prompt" class="studio-prompt" rows="2" placeholder="Describe what to generate..."></textarea>
+          <textarea id="studio-negative" class="studio-prompt studio-negative" rows="2" placeholder="What to avoid (negative prompt)...">text, watermark, logo, UI chrome, blurry, noisy, low quality, jpeg artifacts</textarea>
+          <div id="studio-image-options" class="studio-sliders">
+            <label class="studio-slider">
+              <span>Size <em id="studio-size-label"></em></span>
+              <input id="studio-size" type="range" min="0" max="5" step="1" value="2">
+            </label>
+            <label class="studio-slider">
+              <span>Quality <em id="studio-quality-label"></em></span>
+              <input id="studio-quality" type="range" min="0" max="2" step="1" value="1">
+            </label>
+          </div>
+          <div id="studio-video-options" class="studio-sliders" style="display:none">
+            <label class="studio-slider">
+              <span>Length <em id="studio-length-label"></em></span>
+              <input id="studio-length" type="range" min="2" max="10" step="1" value="6">
+            </label>
+          </div>
+          <div id="studio-edit-options" class="studio-edit" style="display:none">
+            <label class="studio-file">
+              <span>Photo to edit</span>
+              <input id="studio-photo" type="file" accept="image/png,image/jpeg,image/webp">
+            </label>
+            <label class="studio-file">
+              <span>Reference photo (optional, e.g. the person to add)</span>
+              <input id="studio-ref" type="file" accept="image/png,image/jpeg,image/webp">
+            </label>
+          </div>
+          <div class="studio-row">
+            <span id="studio-hint" class="studio-hint"></span>
+            <button id="studio-go" class="btn-sm studio-go" type="button">Generate</button>
+          </div>
+        </div>
+        <div id="studio-result" class="studio-result"></div>
+        <div id="studio-last" class="studio-last"></div>
+        <div id="studio-history" class="studio-history"></div>
+      </div>
+    </section>
+
+    <section id="media" class="sec"><div id="media-card"></div></section>
+
+    <section id="terminal" class="sec">
+      <div class="term-shell glass">
+        <div class="term-head">
+          <div>
+            <div class="term-title">Terminal</div>
+            <div class="term-sub">Run commands on the rig from here &middot; no SSH needed</div>
+          </div>
+          <button id="term-restart" class="btn-sm btn-ghost" type="button" title="Restart the dashboard service">Restart service</button>
+        </div>
+        <div class="term-controls">
+          <select id="term-shell" class="chat-select" aria-label="Shell">
+            <option value="powershell">PowerShell</option>
+            <option value="cmd">cmd</option>
+            <option value="bash">bash</option>
+          </select>
+          <select id="term-cwd" class="chat-select" aria-label="Working directory"></select>
+        </div>
+        <div class="term-inwrap">
+          <input id="term-cmd" class="term-cmd" type="text" autocomplete="off" spellcheck="false"
+                 placeholder="e.g.  nvidia-smi   ·   python -m uvicorn app:app --port 9000" />
+          <button id="term-run" class="btn-sm" type="button">Run</button>
+          <button id="term-bg" class="btn-sm btn-ghost" type="button" title="Start as a background process (servers)">Background</button>
+        </div>
+        <div id="term-quick" class="term-quick"></div>
+        <pre id="term-output" class="term-output">Ready. Commands run in the service account on this rig.</pre>
+        <div class="term-proc-head">
+          <span>Background processes</span>
+          <button id="term-proc-refresh" class="btn-sm btn-ghost" type="button">Refresh</button>
+        </div>
+        <div id="term-procs" class="term-procs"></div>
+      </div>
+    </section>
+
+    <section id="system" class="sec">
+      <div class="seg sys-tabs" id="sys-tabs">
+        <button class="seg-btn active" type="button" data-sys="gpu">GPU</button>
+        <button class="seg-btn" type="button" data-sys="cpu">CPU</button>
+        <button class="seg-btn" type="button" data-sys="mem">Memory</button>
+        <button class="seg-btn" type="button" data-sys="disks">Disks</button>
+        <button class="seg-btn" type="button" data-sys="net">Network</button>
+        <button class="seg-btn" type="button" data-sys="proc">Processes</button>
+        <button class="seg-btn" type="button" data-sys="rgb">Lighting</button>
+        <button class="seg-btn" type="button" data-sys="raw">Raw</button>
+      </div>
+      <div id="sys-gpu" class="sys-pane active"><div id="gpu-card"></div></div>
+      <div id="sys-cpu" class="sys-pane"><div id="cpu-card"></div></div>
+      <div id="sys-mem" class="sys-pane"><div id="mem-card"></div></div>
+      <div id="sys-disks" class="sys-pane"><div id="disks-card"></div></div>
+      <div id="sys-net" class="sys-pane"><div id="net-card"></div></div>
+      <div id="sys-proc" class="sys-pane"><div id="proc-card"></div></div>
+      <div id="sys-rgb" class="sys-pane"><div id="rgb-card"></div></div>
+      <div id="sys-raw" class="sys-pane">
+        <div class="glass rawsec">
+          <button id="btn-copy" class="btn-sm">Copy Latest JSON</button>
+          <pre id="raw-data">{}</pre>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+  <div id="cmdk" class="cmdk" hidden>
+    <div class="cmdk-backdrop" id="cmdk-backdrop"></div>
+    <div class="cmdk-panel" role="dialog" aria-label="Command palette">
+      <input id="cmdk-input" class="cmdk-input" type="text" autocomplete="off" spellcheck="false"
+             placeholder="Jump to a tab, load a model, start a service, save a memory..." />
+      <div id="cmdk-list" class="cmdk-list"></div>
+      <div class="cmdk-foot"><span>&#8593;&#8595; navigate &middot; &#8629; run &middot; esc close</span><span class="cmdk-brand">Dobby Console</span></div>
+    </div>
+  </div>
+
+  <script src="/static/app.js?v=74"></script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover,interactive-widget=resizes-content">
+<meta name="theme-color" content="#0d1117">
+<meta name="apple-mobile-web-app-title" content="Dobby">
+<title>Dobby &middot; Personal</title>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg?v=65">
+<link rel="stylesheet" href="/static/styles.css?v=72">
+</head>
+<body data-app="personal">
+
+<div class="app">
+  <header class="hdr">
+    <div class="hdr-left">
+      <h1 class="rig">Dobby</h1>
+      <span id="host" class="host">connecting...</span>
+    </div>
+    <div class="hdr-right">
+      <span id="status-pill" class="pill live">Checking</span>
+      <a class="btn-icon app-switch" href="/" title="Rig console: monitoring, terminal, services">Console</a>
+      <button id="btn-cmdk" class="btn-icon cmdk-btn" aria-label="Command palette" title="Command palette (Ctrl/Cmd-K)">&#x2318;K</button>
+    </div>
+  </header>
+
+  <nav class="bnav" id="bnav">
+    <button class="nb active" data-t="assistant">Assistant</button>
+    <button class="nb" data-t="goals">Goals</button>
+    <button class="nb" data-t="hermes">Memory</button>
+    <button class="nb" data-t="messaging">Messages</button>
+  </nav>
+
+  <main class="content" id="main">
+    <section id="assistant" class="sec active">
+      <div class="chat-shell glass">
+        <div class="chat-top">
+          <select id="chat-model" class="chat-select"></select>
+          <span id="chat-warm" class="chat-warm" style="display:none"></span>
+          <span id="chat-unc" class="chat-unc" style="display:none">UNCENSORED</span>
+          <button id="chat-mem" class="chat-memtog" type="button" title="Inject relevant Hermes memories into the chat">&#129504; Memory</button>
+          <button id="chat-voice" class="chat-memtog" type="button" title="Auto-play each reply in the local Latvian neural voice">&#128266; Voice</button>
+          <button id="chat-new" class="btn-sm btn-ghost">New chat</button>
+        </div>
+        <div id="chat-log" class="chat-log">
+          <div class="chat-empty" id="chat-empty">
+            <div class="ce-big">Local Assistant</div>
+            <div class="ce-sub">Runs fully on this rig &middot; nothing leaves your network</div>
+          </div>
+        </div>
+        <div class="chat-inwrap">
+          <textarea id="chat-input" class="chat-input" rows="1" placeholder="Ask anything..."></textarea>
+          <button id="chat-send" class="chat-sendbtn" aria-label="Send">&#x27A4;</button>
+        </div>
+      </div>
+    </section>
+
+    <section id="goals" class="sec">
+      <div id="goals-card"></div>
+    </section>
+
+    <section id="hermes" class="sec"><div id="hermes-card"></div></section>
+
+    <section id="messaging" class="sec">
+      <div class="messaging-shell glass" id="messaging-panel">
+        <div class="messaging-head">
+          <div>
+            <div class="messaging-title">Messages</div>
+            <div id="messaging-sub" class="messaging-sub">debug by default; real bridges require Real send</div>
+          </div>
+          <button id="messaging-refresh" class="btn-sm btn-ghost" type="button">Refresh</button>
+        </div>
+        <div id="messaging-status" class="messaging-status"></div>
+        <div class="messaging-card messaging-primary">
+          <div class="messaging-card-h">Ask the rig</div>
+          <div id="rig-agent-status" class="messaging-config">loading...</div>
+          <div id="rig-agent-skills" class="digest-chips"></div>
+          <div class="messaging-row">
+            <input id="rig-agent-q" class="messaging-input" style="flex:1;min-width:160px"
+                   placeholder="cik grādi GPU?  ·  /status  ·  what's on my calendar" />
+            <button id="rig-agent-ask" class="btn-sm" type="button">Ask</button>
+          </div>
+          <pre id="rig-agent-output" class="messaging-output"></pre>
+          <details class="code-adv">
+            <summary>Who can ask &amp; calendar</summary>
+            <div class="messaging-flow-grid" style="padding:12px">
+              <label class="messaging-field">
+                <span>Owners — handles allowed to query the rig (comma separated)</span>
+                <input id="rig-agent-owners" class="messaging-input"
+                       placeholder="+37120000000, owner@example.com" />
+              </label>
+              <label class="messaging-field">
+                <span>Calendar .ics URLs (one per line) — iCloud public link or Google secret address</span>
+                <textarea id="rig-agent-ics" class="studio-prompt" rows="2"
+                          placeholder="https://p01-calendars.icloud.com/published/..."></textarea>
+              </label>
+              <div class="messaging-row">
+                <label class="messaging-check"><input id="rig-agent-enabled" type="checkbox" /><span>Enabled</span></label>
+                <button id="rig-agent-save" class="btn-sm" type="button">Save</button>
+              </div>
+            </div>
+          </details>
+          <details class="code-adv">
+            <summary>Film suggestions (Jellyfin)</summary>
+            <div class="messaging-flow-grid" style="padding:12px">
+              <div id="rig-watch-status" class="messaging-config">loading...</div>
+              <label class="messaging-field">
+                <span>Who gets suggestions — one per line, <code>handle = Jellyfin account</code>.
+                      Anyone not listed gets no suggestion at all.</span>
+                <textarea id="rig-watch-users" class="studio-prompt" rows="3"
+                          placeholder="+37120000001 = Anna&#10;owner@example.com = J&#257;nis"></textarea>
+              </label>
+              <div class="messaging-row">
+                <label class="messaging-check"><input id="rig-watch-enabled" type="checkbox" /><span>Film suggestions on</span></label>
+                <button id="rig-watch-save" class="btn-sm" type="button">Save</button>
+              </div>
+            </div>
+          </details>
+        </div>
+        <div class="messaging-card">
+          <div class="messaging-card-h">Send Test</div>
+          <div class="messaging-flow-grid">
+            <label class="messaging-field">
+              <span>Provider</span>
+              <select id="messaging-provider" class="messaging-input">
+                <option value="debug">Debug</option>
+                <option value="bluebubbles_http">BlueBubbles HTTP</option>
+                <option value="http_bridge">Generic HTTP Bridge</option>
+                <option value="openclaw_imessage">OpenClaw iMessage</option>
+              </select>
+            </label>
+            <label class="messaging-field">
+              <span>Target</span>
+              <input id="messaging-target" class="messaging-input" placeholder="debug target label" />
+            </label>
+          </div>
+          <textarea id="messaging-text" class="studio-prompt" rows="3" placeholder="Message text for debug history only..."></textarea>
+          <div class="messaging-row">
+            <label class="messaging-check"><input id="messaging-real-send" type="checkbox" /><span>Real send</span></label>
+            <span id="messaging-warning" class="messaging-note">Debug records locally. Non-debug providers require Real send.</span>
+            <button id="messaging-send" class="btn-sm" type="button">Send</button>
+          </div>
+        </div>
+        <div class="messaging-card">
+          <div class="messaging-card-h">Auto-Reply (AI answers as you)</div>
+          <div id="autoreply-status" class="messaging-config"></div>
+          <div class="messaging-flow-grid">
+            <label class="messaging-field">
+              <span>Allowed senders (comma separated, * = anyone)</span>
+              <input id="autoreply-senders" class="messaging-input" placeholder="+37120000000, friend@example.com" />
+            </label>
+            <label class="messaging-field">
+              <span>Model</span>
+              <input id="autoreply-model" class="messaging-input" placeholder="assistant:latest" />
+            </label>
+          </div>
+          <div id="corrections-status" class="messaging-config">quality: loading...</div>
+          <textarea id="autoreply-test-text" class="studio-prompt" rows="2" placeholder="Type a fake incoming message to preview the AI reply (nothing is sent)..."></textarea>
+          <div class="messaging-row">
+            <label class="messaging-check" title="Answers YOU as an assistant, in the chats listed as assistant chats">
+              <input id="assistant-enabled" type="checkbox" /><span>&#129302; Assistant to me</span></label>
+            <label class="messaging-check" title="Anton answers in your other chats as ITSELF, not as you. Who it speaks as is reply_persona in messaging.json (currently 'ai' = Anton); 'owner' would imitate you.">
+              <input id="autoreply-enabled" type="checkbox" /><span>&#129302; Anton answers others</span></label>
+            <label class="messaging-check" title="Lets Anton book, move and cancel dates from chat, and serve the shared calendar feed. Off by default.">
+              <input id="calendar-enabled" type="checkbox" /><span>&#128197; Date planning</span></label>
+            <button id="autoreply-save" class="btn-sm" type="button">Save</button>
+            <button id="autoreply-test" class="btn-sm btn-ghost" type="button">Test reply</button>
+            <button id="corrections-mine" class="btn-sm btn-ghost" type="button"
+                    title="Rebuild style examples from replies you typed over">Learn from my edits</button>
+          </div>
+          <pre id="autoreply-output" class="messaging-output"></pre>
+        </div>
+        <div class="messaging-card">
+          <div class="messaging-card-h">Daily News Digest</div>
+          <div id="digest-status" class="messaging-config">loading...</div>
+          <div id="digest-recipients" class="digest-chips"></div>
+          <div class="messaging-flow-grid">
+            <label class="messaging-field">
+              <span>Add recipient (chat guid)</span>
+              <input id="digest-add-input" class="messaging-input" list="digest-known-chats"
+                     placeholder="iMessage;-;+37120000000" />
+              <datalist id="digest-known-chats"></datalist>
+            </label>
+            <label class="messaging-field">
+              <span>Send hour (0-23)</span>
+              <input id="digest-hour" class="messaging-input" type="number" min="0" max="23" step="1" />
+            </label>
+          </div>
+          <div class="messaging-row">
+            <label class="messaging-check"><input id="digest-enabled" type="checkbox" /><span>Enabled</span></label>
+            <button id="digest-add" class="btn-sm btn-ghost" type="button">Add recipient</button>
+            <button id="digest-preview" class="btn-sm btn-ghost" type="button">Preview</button>
+            <button id="digest-send" class="btn-sm" type="button">Send now</button>
+          </div>
+          <pre id="digest-output" class="messaging-output"></pre>
+        </div>
+        <div class="messaging-card">
+          <div class="messaging-card-h">Inbox (incoming iMessages)</div>
+          <div id="messaging-inbox" class="messaging-config">No inbound messages loaded.</div>
+        </div>
+        <div class="messaging-card">
+          <div class="messaging-card-h">Config</div>
+          <div id="messaging-config" class="messaging-config"></div>
+        </div>
+        <div class="messaging-card">
+          <div class="messaging-card-h">Outbox / History</div>
+          <div id="messaging-last" class="messaging-note">No message attempts loaded.</div>
+          <pre id="messaging-output" class="messaging-output"></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+  <div id="cmdk" class="cmdk" hidden>
+    <div class="cmdk-backdrop" id="cmdk-backdrop"></div>
+    <div class="cmdk-panel" role="dialog" aria-label="Command palette">
+      <input id="cmdk-input" class="cmdk-input" type="text" autocomplete="off" spellcheck="false"
+             placeholder="Jump to a tab, save a memory, add a goal..." />
+      <div id="cmdk-list" class="cmdk-list"></div>
+      <div class="cmdk-foot"><span>&#8593;&#8595; navigate &middot; &#8629; run &middot; esc close</span><span class="cmdk-brand">Dobby</span></div>
+    </div>
+  </div>
+
+  <script src="/static/app.js?v=76"></script>
+</body>
+</html>

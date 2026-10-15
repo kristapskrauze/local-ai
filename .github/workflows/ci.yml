@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  scan:
+    name: Secrets and personal data
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - name: Triage scan (fails on credential files or hardcoded secrets)
+        run: python tools/triage_scan.py . -o triage_report.md > /dev/null
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: triage-report
+          path: triage_report.md
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+      - run: pip install ruff==0.16.5
+      - name: Syntax errors and undefined names (blocking)
+        run: ruff check . --select E9,F63,F7,F82 --output-format github
+      - name: Full rule set from ruff.toml (report only, known debt is baselined)
+        run: ruff check . --output-format github --exit-zero
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: JavaScript syntax
+        run: |
+          for f in app/static/app.js app/*.mjs _tools/*.js _tools/*/*.mjs; do
+            node --check "$f"
+          done
+
+  tests:
+    name: Offline test suite
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          cache: pip
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install Python dependencies
+        run: pip install -r requirements-dev.txt
+      - name: Install pyright (used by the self-heal verify ladder)
+        run: npm install -g pyright@1.1.413
+      - name: Install Playwright for the page tests
+        working-directory: _tools/page_tests
+        run: |
+          npm ci
+          npx playwright install chromium
+      - name: Example config
+        shell: pwsh
+        run: Copy-Item -Recurse config.example config
+      - name: Latvian Hunspell dictionary (LibreOffice, used by the word checks)
+        shell: pwsh
+        run: |
+          $dir = Join-Path $env:RUNNER_TEMP "AI\lv_dict"
+          New-Item -ItemType Directory -Force $dir | Out-Null
+          foreach ($ext in "aff", "dic") {
+            Invoke-WebRequest -UseBasicParsing -OutFile (Join-Path $dir "lv_LV.$ext") `
+              "https://raw.githubusercontent.com/LibreOffice/dictionaries/master/lv_LV/lv_LV.$ext"
+          }
+          "AI_HOME=$(Join-Path $env:RUNNER_TEMP 'AI')" | Out-File -Append -Encoding utf8 $env:GITHUB_ENV
+      - name: Run every test with the network blocked
+        run: python tests/run_offline.py --show

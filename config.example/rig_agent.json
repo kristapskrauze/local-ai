@@ -1,0 +1,11 @@
+{
+  "enabled": true,
+  "owners": [
+    "owner@example.com"
+  ],
+  "calendar_ics": [],
+  "calendar_days": 7,
+  "calendar_max_events": 6,
+  "watch_enabled": true,
+  "jellyfin_users": {}
+}

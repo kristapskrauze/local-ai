@@ -1,0 +1,14 @@
+fastapi>=0.115.0
+uvicorn>=0.32.0
+pydantic>=2.9
+psutil>=6.1.0
+numpy>=2.0
+pythonnet>=3.0.5
+paramiko>=5.0.0
+pypdf>=5.0.0
+pillow>=11.0
+pyicloud>=2.0
+spylls>=0.1.7
+requests>=2.32
+hidapi>=0.14
+tzdata>=2025.2

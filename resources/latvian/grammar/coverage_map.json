@@ -1,0 +1,35 @@
+{
+  "version": "2026-08-20-phase2",
+  "source": "Uzdevumi.lv public Latvian/Skola2030 topic structure plus local Owen failure taxonomy",
+  "schema": {
+    "category": "major grammar area",
+    "concept": "competency to test",
+    "priority": "high|medium|low",
+    "implemented_detection": "yes|partial|no",
+    "implemented_fix": "yes|partial|no|detection_only",
+    "risk": "main false-positive or false-negative concern"
+  },
+  "items": [
+    {"category": "nouns", "concept": "gender", "priority": "high", "implemented_detection": "partial", "implemented_fix": "partial", "risk": "adjective agreement can be over-applied when the adjective modifies a later noun"},
+    {"category": "nouns", "concept": "number", "priority": "high", "implemented_detection": "partial", "implemented_fix": "partial", "risk": "plural agreement only tested for explicit personal pronouns"},
+    {"category": "nouns", "concept": "case", "priority": "high", "implemented_detection": "partial", "implemented_fix": "partial", "risk": "preposition/verb government is safe only in curated common contexts"},
+    {"category": "nouns", "concept": "declension", "priority": "medium", "implemented_detection": "no", "implemented_fix": "no", "risk": "requires broader morphology than installed Hunspell lookup provides"},
+    {"category": "nouns", "concept": "proper names", "priority": "medium", "implemented_detection": "partial", "implemented_fix": "no", "risk": "capitalized names should suppress aggressive case correction"},
+    {"category": "adjectives", "concept": "gender_number_agreement", "priority": "high", "implemented_detection": "partial", "implemented_fix": "partial", "risk": "predicate-only guard needed to avoid adjective+noun false positives"},
+    {"category": "adjectives", "concept": "case_agreement", "priority": "high", "implemented_detection": "partial", "implemented_fix": "partial", "risk": "direct-object adjective+noun pairs cover common generated forms only"},
+    {"category": "adjectives", "concept": "definite_forms", "priority": "medium", "implemented_detection": "no", "implemented_fix": "no", "risk": "needs morphology and style context"},
+    {"category": "adjectives", "concept": "comparatives_superlatives", "priority": "medium", "implemented_detection": "no", "implemented_fix": "no", "risk": "naturalness issue more than deterministic fix target"},
+    {"category": "verbs", "concept": "person_number_agreement", "priority": "high", "implemented_detection": "partial", "implemented_fix": "partial", "risk": "currently high-confidence first-person plural aiziet family only"},
+    {"category": "verbs", "concept": "tense", "priority": "medium", "implemented_detection": "no", "implemented_fix": "no", "risk": "semantic/time context needed"},
+    {"category": "verbs", "concept": "mood", "priority": "medium", "implemented_detection": "no", "implemented_fix": "no", "risk": "Skola2030 topic, not enough local evidence yet"},
+    {"category": "verbs", "concept": "participles", "priority": "medium", "implemented_detection": "no", "implemented_fix": "no", "risk": "punctuation and agreement interactions are high false-positive risk"},
+    {"category": "verbs", "concept": "case_government", "priority": "high", "implemented_detection": "partial", "implemented_fix": "partial", "risk": "multiple valid complements for some verbs must be preserved"},
+    {"category": "pronouns", "concept": "personal_pronoun_case", "priority": "high", "implemented_detection": "partial", "implemented_fix": "partial", "risk": "only clear transitive/dative contexts"},
+    {"category": "pronouns", "concept": "reflexive_possessive_savs", "priority": "high", "implemented_detection": "partial", "implemented_fix": "detection_only", "risk": "reference ambiguity makes auto-fix dangerous"},
+    {"category": "prepositions", "concept": "case_government", "priority": "high", "implemented_detection": "partial", "implemented_fix": "partial", "risk": "common ar/pie/uz contexts only"},
+    {"category": "numerals", "concept": "noun_agreement", "priority": "medium", "implemented_detection": "no", "implemented_fix": "no", "risk": "not yet enough Owen evidence"},
+    {"category": "syntax", "concept": "simple_sentence", "priority": "high", "implemented_detection": "partial", "implemented_fix": "partial", "risk": "regex context windows only, no parser"},
+    {"category": "syntax", "concept": "coordination_subordination", "priority": "medium", "implemented_detection": "no", "implemented_fix": "no", "risk": "Latvian word order flexibility makes false positives likely"},
+    {"category": "punctuation", "concept": "commas_relative_clauses_address_participles", "priority": "medium", "implemented_detection": "no", "implemented_fix": "no", "risk": "do not build an aggressive comma monster"}
+  ]
+}

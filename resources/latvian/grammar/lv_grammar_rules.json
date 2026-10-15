@@ -1,0 +1,209 @@
+{
+  "version": "2026-08-20-phase2",
+  "source_note": "Rules are high-confidence local patterns mapped to the Uzdevumi.lv grammar taxonomy. They are deliberately conservative and avoid broad parsing claims.",
+  "rules": [
+    {
+      "id": "lv.agreement.subject_verb.mes_aizgaja_general",
+      "category": "agreement.subject_verb",
+      "pattern": "\\b(Mēs|mēs)((?:\\s+(?:abi|abas|vakar|jau|šodien|arī|tur|kopā))*)\\s+(ne)?aizgāja\\b",
+      "replacement": "\\1\\2 \\3aizgājām",
+      "message": "The explicit subject 'mēs' needs the 1st person plural verb form.",
+      "concepts": ["Darbības vārds", "Darbības vārda konjugācijas", "Teikuma gramatiskais centrs"],
+      "confidence": 0.99,
+      "blocked_by": ["\\bMēs\\s*,"]
+    },
+    {
+      "id": "lv.agreement.adjective_number.vini_priecigs",
+      "category": "agreement.adjective_number",
+      "pattern": "\\b(Viņi|viņi)\\s+(bija|ir|būs)((?:\\s+(?:ļoti|diezgan))?)\\s+priecīgs\\b(?=[.!?,]|$)",
+      "replacement": "\\1 \\2\\3 priecīgi",
+      "message": "The plural pronoun 'viņi' needs a masculine plural adjective form.",
+      "concepts": ["Īpašības vārds", "Vārdu saskaņojums"],
+      "confidence": 0.98
+    },
+    {
+      "id": "lv.agreement.adjective_number.vini_gatavs",
+      "category": "agreement.adjective_number",
+      "pattern": "\\b(Viņi|viņi)\\s+(bija|ir|būs)((?:\\s+(?:ļoti|diezgan))?)\\s+gatavs\\b(?=[.!?,]|$)",
+      "replacement": "\\1 \\2\\3 gatavi",
+      "message": "The plural pronoun 'viņi' needs a masculine plural adjective form.",
+      "concepts": ["Īpašības vārds", "Vārdu saskaņojums"],
+      "confidence": 0.98
+    },
+    {
+      "id": "lv.agreement.adjective_number.vini_dusmigs",
+      "category": "agreement.adjective_number",
+      "pattern": "\\b(Viņi|viņi)\\s+(bija|ir|būs)((?:\\s+(?:ļoti|diezgan))?)\\s+dusmīgs\\b(?=[.!?,]|$)",
+      "replacement": "\\1 \\2\\3 dusmīgi",
+      "message": "The plural pronoun 'viņi' needs a masculine plural adjective form.",
+      "concepts": ["Īpašības vārds", "Vārdu saskaņojums"],
+      "confidence": 0.98
+    },
+    {
+      "id": "lv.agreement.adjective_number.vini_noguris",
+      "category": "agreement.adjective_number",
+      "pattern": "\\b(Viņi|viņi)\\s+(bija|ir|būs)((?:\\s+(?:ļoti|diezgan))?)\\s+noguris\\b(?=[.!?,]|$)",
+      "replacement": "\\1 \\2\\3 noguruši",
+      "message": "The plural pronoun 'viņi' needs a masculine plural adjective form.",
+      "concepts": ["Īpašības vārds", "Vārdu saskaņojums"],
+      "confidence": 0.98
+    },
+    {
+      "id": "lv.agreement.adjective_number.vinas_priecigs",
+      "category": "agreement.adjective_number",
+      "pattern": "\\b(Viņas|viņas)\\s+(bija|ir|būs)((?:\\s+(?:ļoti|diezgan))?)\\s+priecīgs\\b(?=[.!?,]|$)",
+      "replacement": "\\1 \\2\\3 priecīgas",
+      "message": "The plural pronoun 'viņas' needs a feminine plural adjective form.",
+      "concepts": ["Īpašības vārds", "Vārdu saskaņojums"],
+      "confidence": 0.98
+    },
+    {
+      "id": "lv.agreement.adjective_number.vinas_gatavs",
+      "category": "agreement.adjective_number",
+      "pattern": "\\b(Viņas|viņas)\\s+(bija|ir|būs)((?:\\s+(?:ļoti|diezgan))?)\\s+gatavs\\b(?=[.!?,]|$)",
+      "replacement": "\\1 \\2\\3 gatavas",
+      "message": "The plural pronoun 'viņas' needs a feminine plural adjective form.",
+      "concepts": ["Īpašības vārds", "Vārdu saskaņojums"],
+      "confidence": 0.98
+    },
+    {
+      "id": "lv.agreement.adjective_number.vinas_dusmigs",
+      "category": "agreement.adjective_number",
+      "pattern": "\\b(Viņas|viņas)\\s+(bija|ir|būs)((?:\\s+(?:ļoti|diezgan))?)\\s+dusmīgs\\b(?=[.!?,]|$)",
+      "replacement": "\\1 \\2\\3 dusmīgas",
+      "message": "The plural pronoun 'viņas' needs a feminine plural adjective form.",
+      "concepts": ["Īpašības vārds", "Vārdu saskaņojums"],
+      "confidence": 0.98
+    },
+    {
+      "id": "lv.agreement.adjective_number.vinas_noguris",
+      "category": "agreement.adjective_number",
+      "pattern": "\\b(Viņas|viņas)\\s+(bija|ir|būs)((?:\\s+(?:ļoti|diezgan))?)\\s+noguris\\b(?=[.!?,]|$)",
+      "replacement": "\\1 \\2\\3 nogurušas",
+      "message": "The plural pronoun 'viņas' needs a feminine plural adjective form.",
+      "concepts": ["Īpašības vārds", "Vārdu saskaņojums"],
+      "confidence": 0.98
+    },
+    {
+      "id": "lv.case.preposition.ar_context",
+      "category": "case.preposition",
+      "pattern_template": "\\b(?P<context>braucu|atnāca|runāju|palīdzēju|Runāju|Palīdzēju|braukt)\\s+{bad}\\b",
+      "replacement_template": "\\g<context> {good}",
+      "message": "The preposition 'ar' needs the governed noun form in this context.",
+      "concepts": ["Lietvārds", "Locīšana", "Prievārds"],
+      "confidence": 0.98,
+      "ignore_case": false,
+      "forms": [
+        {"bad": "ar mašīna", "good": "ar mašīnu"},
+        {"bad": "ar autobuss", "good": "ar autobusu"},
+        {"bad": "ar draugs", "good": "ar draugu"},
+        {"bad": "ar brālis", "good": "ar brāli"},
+        {"bad": "ar māsa", "good": "ar māsu"}
+      ]
+    },
+    {
+      "id": "lv.case.preposition.pie_context",
+      "category": "case.preposition",
+      "pattern_template": "\\b(?P<context>aizgāju|biju|Aiziesim|palika)\\s+{bad}\\b",
+      "replacement_template": "\\g<context> {good}",
+      "message": "The preposition 'pie' needs the genitive form in this context.",
+      "concepts": ["Lietvārds", "Locīšana", "Prievārds"],
+      "confidence": 0.98,
+      "ignore_case": false,
+      "forms": [
+        {"bad": "pie draugs", "good": "pie drauga"},
+        {"bad": "pie brālis", "good": "pie brāļa"},
+        {"bad": "pie māsa", "good": "pie māsas"},
+        {"bad": "pie ārsts", "good": "pie ārsta"}
+      ]
+    },
+    {
+      "id": "lv.case.preposition.uz_context",
+      "category": "case.preposition",
+      "pattern_template": "\\b(?P<context>braucu|Aiziesim|aizgāja|iešu)\\s+{bad}\\b",
+      "replacement_template": "\\g<context> {good}",
+      "message": "The preposition 'uz' needs the accusative/directional form in this context.",
+      "concepts": ["Lietvārds", "Locīšana", "Prievārds"],
+      "confidence": 0.98,
+      "ignore_case": false,
+      "forms": [
+        {"bad": "uz veikals", "good": "uz veikalu"},
+        {"bad": "uz darbs", "good": "uz darbu"},
+        {"bad": "uz māja", "good": "uz māju"}
+      ]
+    },
+    {
+      "id": "lv.case.preposition.ar_mans_draugs",
+      "category": "case.preposition",
+      "pattern": "\\bar\\s+mans\\s+draugs\\b",
+      "replacement": "ar savu draugu",
+      "message": "This first-person phrase needs governed case and reflexive possessive.",
+      "concepts": ["Vietniekvārds", "Lietvārds", "Prievārds"],
+      "confidence": 0.97,
+      "ignore_case": false
+    },
+    {
+      "id": "lv.case.direct_object.common_adj_noun",
+      "category": "case.direct_object",
+      "pattern_template": "\\b(?P<verb>nopirku|paņēmu|atradu)\\s+{bad}\\b",
+      "replacement_template": "\\g<verb> {good}",
+      "message": "The direct object needs accusative noun and adjective forms.",
+      "concepts": ["Lietvārds", "Īpašības vārds", "Teikuma locekļi"],
+      "confidence": 0.98,
+      "ignore_case": false,
+      "forms": [
+        {"bad": "jauns telefons", "good": "jaunu telefonu"},
+        {"bad": "vecs dators", "good": "vecu datoru"},
+        {"bad": "laba grāmata", "good": "labu grāmatu"},
+        {"bad": "jauna biļete", "good": "jaunu biļeti"},
+        {"bad": "liels galds", "good": "lielu galdu"},
+        {"bad": "mazs suns", "good": "mazu suni"}
+      ]
+    },
+    {
+      "id": "lv.case.direct_object.redzeju_vins",
+      "category": "case.direct_object",
+      "pattern": "\\b(?P<verb>redzēju|satikām|dzirdēju)\\s+viņš\\b",
+      "replacement": "\\g<verb> viņu",
+      "message": "The direct object needs the accusative pronoun form.",
+      "concepts": ["Vietniekvārds", "Teikuma locekļi"],
+      "confidence": 0.99,
+      "ignore_case": false
+    },
+    {
+      "id": "lv.government.verb_dative.zvanit",
+      "category": "government.verb_dative",
+      "pattern_template": "\\b(?P<verb>piezvanīju|zvanīju)\\s+uz\\s+{bad}\\b",
+      "replacement_template": "\\g<verb> {good}",
+      "message": "The verb zvanīt/piezvanīt takes a dative complement, not 'uz' plus accusative.",
+      "concepts": ["Darbības vārds", "Vietniekvārds", "Locīšana"],
+      "confidence": 0.99,
+      "ignore_case": false,
+      "forms": [
+        {"bad": "savu draugu", "good": "savam draugam"},
+        {"bad": "manu brāli", "good": "manam brālim"}
+      ]
+    },
+    {
+      "id": "lv.government.verb_dative.pronoun_vins",
+      "category": "government.verb_dative",
+      "pattern": "\\b(?P<verb>palīdzēju|jautāju|uzticos)\\s+viņš\\b",
+      "replacement": "\\g<verb> viņam",
+      "message": "This verb takes a dative pronoun complement.",
+      "concepts": ["Darbības vārds", "Vietniekvārds", "Locīšana"],
+      "confidence": 0.98,
+      "ignore_case": false
+    },
+    {
+      "id": "lv.reflexive_possessive.vina_sava_mamma.detect_only",
+      "category": "reflexive_possessive",
+      "pattern": "\\b(Viņa|viņa)\\s+aizgāja\\s+pie\\s+viņas\\s+mammas\\b(?=[.!?]|$)",
+      "replacement": "\\1 aizgāja pie savas mammas",
+      "message": "Possible reflexive possessive issue; left detection-only because reference can be ambiguous.",
+      "concepts": ["Vietniekvārds", "Valodas kultūra", "Sintakse"],
+      "confidence": 0.90,
+      "auto_fix": false,
+      "blocked_by": ["nevis\\s+(?:pie\\s+)?savas"]
+    }
+  ]
+}

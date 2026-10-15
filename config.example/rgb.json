@@ -1,0 +1,32 @@
+{
+  "enabled": true,
+  "mode": "off",
+  "color": "#4400ff",
+  "brightness": 19,
+  "speed": 50,
+  "interval_ms": 120,
+  "alert": true,
+  "alert_gpu_temp": 84.0,
+  "alert_cpu_temp": 95.0,
+  "disabled_devices": [
+    "EVision Keyboard 0C45:652F"
+  ],
+  "key_effect": "solid",
+  "jrgb": true,
+  "jrgb_invert": false,
+  "mystic": true,
+  "mystic_color": "",
+  "mystic_areas": [
+    "MSI_MB:0",
+    "MSI_MB:1",
+    "MSI_MB:2",
+    "MSI_MB:3",
+    "MSI_MB:4",
+    "MSI_MB:5",
+    "MSI_MB:6",
+    "MSI_MB:7",
+    "MSI_MB:9"
+  ],
+  "keyboard": true,
+  "gpu_label": false
+}
